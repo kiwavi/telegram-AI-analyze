@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cli-select": "^1.1.2",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "telegram": "^2.26.16"
