@@ -40,13 +40,14 @@ let rt_dialo_id = dialogs.find((nm) => nm.name === "RT News")?.entity;
 let messages = await client.getMessages(rt_dialo_id, {
   limit: undefined,
   waitTime: 10,
-  // search: "Communist",
 });
 
-let filteredMessages = messages.map((msg) => {
-  new Date(msg.date * 1000) > new Date("2023-10-07T00:29:02.000Z");
-});
+let filteredMessages = [];
 
-console.log(filteredMessages.length);
+for (let msg of messages) {
+  if (new Date(msg.date * 1000) > new Date("2023-10-07T00:29:02.000Z")) {
+    filteredMessages.push(msg);
+  }
+}
 
 // The channel, searchString should preferably be dynamic
