@@ -47,6 +47,6 @@ let filteredMessages = messages.map((msg) => {
   new Date(msg.date * 1000) > new Date("2023-10-07T00:29:02.000Z");
 });
 
-console.log(messages.length);
+console.log(filteredMessages.length);
 
 // The channel, searchString should preferably be dynamic
