@@ -18,9 +18,10 @@ export const channels = pgTable("channels", {
   created_at: timestamp({ precision: 6, withTimezone: true })
     .notNull()
     .defaultNow(),
-  updated_at: timestamp({ precision: 6, withTimezone: true })
+  updated_at: timestamp("updated_at")
     .notNull()
-    .default(sql`CURRENT_TIMESTAMP(3) on update CURRENT_TIMESTAMP(3)`),
+    .default(sql`CURRENT_TIMESTAMP`)
+    .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   deleted_at: timestamp("deleted_at"),
 });
 
@@ -33,9 +34,10 @@ export const messages = pgTable("messages", {
   message: text().notNull(),
   telegram_message_id: integer(),
   created_at: timestamp("created_at").notNull().defaultNow(),
-  updated_at: timestamp({ precision: 6, withTimezone: true })
+  updated_at: timestamp("updated_at")
     .notNull()
-    .default(sql`CURRENT_TIMESTAMP(3) on update CURRENT_TIMESTAMP(3)`),
+    .default(sql`CURRENT_TIMESTAMP`)
+    .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   deleted_at: timestamp("deleted_at"),
   channel_id: integer()
     .notNull()
@@ -57,9 +59,10 @@ export const questions = pgTable("questions", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   question: text().notNull(),
   created_at: timestamp("created_at").notNull().defaultNow(),
-  updated_at: timestamp({ precision: 6, withTimezone: true })
+  updated_at: timestamp("updated_at")
     .notNull()
-    .default(sql`CURRENT_TIMESTAMP(3) on update CURRENT_TIMESTAMP(3)`),
+    .default(sql`CURRENT_TIMESTAMP`)
+    .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   deleted_at: timestamp("deleted_at"),
 });
 
@@ -77,9 +80,10 @@ export const answers = pgTable("answers", {
     .references(() => messages.id),
   answer: text().notNull(),
   created_at: timestamp("created_at").notNull().defaultNow(),
-  updated_at: timestamp({ precision: 6, withTimezone: true })
+  updated_at: timestamp("updated_at")
     .notNull()
-    .default(sql`CURRENT_TIMESTAMP(3) on update CURRENT_TIMESTAMP(3)`),
+    .default(sql`CURRENT_TIMESTAMP`)
+    .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   deleted_at: timestamp("deleted_at"),
 });
 
