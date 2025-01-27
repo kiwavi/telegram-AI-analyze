@@ -11,7 +11,9 @@ import { relations, sql } from "drizzle-orm";
 
 export const channels = pgTable("channels", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  telegram_channel_id: bigint("bigint", { mode: "bigint" }).unique(),
+  telegram_channel_id: bigint("telegram_channel_id", {
+    mode: "bigint",
+  }).unique(),
   channel_name: varchar({ length: 255 }).notNull(),
   created_at: timestamp({ precision: 6, withTimezone: true })
     .notNull()
@@ -30,13 +32,14 @@ export const messages = pgTable("messages", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   message: text().notNull(),
   telegram_message_id: integer(),
-  createdat: timestamp("created_at").notNull().defaultNow(),
-  updated_at: text("updated_at")
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp({ precision: 6, withTimezone: true })
     .notNull()
-    .default(sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+    .default(sql`CURRENT_TIMESTAMP(3) on update CURRENT_TIMESTAMP(3)`),
   deleted_at: timestamp("deleted_at"),
-  channel_id: integer().notNull(),
+  channel_id: integer()
+    .notNull()
+    .references(() => channels.id),
 });
 
 export const messagesRelations = relations(messages, ({ one }) => ({
@@ -53,11 +56,10 @@ export const messagesRelationsToAnswers = relations(messages, ({ many }) => ({
 export const questions = pgTable("questions", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   question: text().notNull(),
-  createdat: timestamp("created_at").notNull().defaultNow(),
-  updated_at: text("updated_at")
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp({ precision: 6, withTimezone: true })
     .notNull()
-    .default(sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+    .default(sql`CURRENT_TIMESTAMP(3) on update CURRENT_TIMESTAMP(3)`),
   deleted_at: timestamp("deleted_at"),
 });
 
@@ -67,14 +69,17 @@ export const questionsRelationsToAnswers = relations(questions, ({ many }) => ({
 
 export const answers = pgTable("answers", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  question_id: integer().notNull(),
-  message_id: integer().notNull(),
-  answer: text().notNull(),
-  createdat: timestamp("created_at").notNull().defaultNow(),
-  updated_at: text("updated_at")
+  question_id: integer()
     .notNull()
-    .default(sql`(CURRENT_TIMESTAMP)`)
-    .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+    .references(() => questions.id),
+  message_id: integer()
+    .notNull()
+    .references(() => messages.id),
+  answer: text().notNull(),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp({ precision: 6, withTimezone: true })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP(3) on update CURRENT_TIMESTAMP(3)`),
   deleted_at: timestamp("deleted_at"),
 });
 
