@@ -8,6 +8,10 @@ dotenv.config();
 const app: Express = express();
 const port = process.env.PORT;
 
+import { drizzle } from "drizzle-orm/node-postgres";
+
+export const db = drizzle(process.env.DATABASE_URL!);
+
 app.get("/", (req: Request, res: Response) => {
   res.send("");
 });

@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import { TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";
 import readline from "readline";
+import { allChannels, saveChannels } from "../src/db/models/channels";
 
 dotenv.config();
 
@@ -39,10 +40,29 @@ const getChannels = async (): Promise<string[]> => {
   return channels;
 };
 
-if (await getChannels()) {
+let channels = await getChannels();
+
+if (!allChannels?.length) {
+  // if no channels in db
+  console.log("There are no saved channels");
+  console.log(channels);
+  if (channels?.length) {
+    console.log("Saving channels");
+    let res = await saveChannels(channels);
+    console.log(res);
+  } else {
+    console.log(
+      "You are not subscribed to any channels. Please subscribe first",
+    );
+    throw new Error("You are not subscribed to any channels.");
+  }
+} else {
+  // they have channels in db
 }
 
-console.log(await getChannels());
+// we now need to compare the channels they have with the ones in database. But first we need to fetch from database
+
+// fetch those channels.
 
 // const dialogs = await client.getDialogs({});
 
