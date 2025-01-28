@@ -33,21 +33,32 @@ await client.start({
 });
 console.log("You should now be connected.");
 
-const dialogs = await client.getDialogs({});
+const getChannels = async (): Promise<string[]> => {
+  const dialogs = await client.getDialogs({});
+  let channels = dialogs.filter((nm) => nm.isChannel);
+  return channels;
+};
 
-let rt_dialo_id = dialogs.find((nm) => nm.name === "RT News")?.entity;
-
-let messages = await client.getMessages(rt_dialo_id, {
-  limit: undefined,
-  waitTime: 10,
-});
-
-let filteredMessages = [];
-
-for (let msg of messages) {
-  if (new Date(msg.date * 1000) > new Date("2023-10-07T00:29:02.000Z")) {
-    filteredMessages.push(msg);
-  }
+if (await getChannels()) {
 }
+
+console.log(await getChannels());
+
+// const dialogs = await client.getDialogs({});
+
+// let rt_dialo_id = dialogs.find((nm) => nm.name === "RT News")?.entity;
+
+// let messages = await client.getMessages(rt_dialo_id, {
+//   limit: undefined,
+//   waitTime: 10,
+// });
+
+// let filteredMessages = [];
+
+// for (let msg of messages) {
+//   if (new Date(msg.date * 1000) > new Date("2023-10-07T00:29:02.000Z")) {
+//     filteredMessages.push(msg);
+//   }
+// }
 
 // The channel, searchString should preferably be dynamic
