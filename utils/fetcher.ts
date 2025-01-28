@@ -2,7 +2,11 @@ import dotenv from "dotenv";
 import { TelegramClient } from "telegram";
 import { StringSession } from "telegram/sessions";
 import readline from "readline";
-import { allChannels, saveChannels } from "../src/db/models/channels";
+import {
+  allChannels,
+  compareChannels,
+  saveChannels,
+} from "../src/db/models/channels";
 
 dotenv.config();
 
@@ -57,7 +61,24 @@ if (!allChannels?.length) {
     throw new Error("You are not subscribed to any channels.");
   }
 } else {
-  // they have channels in db
+  // they have channels in db. confirm whether some are not in db and inform user
+  let arr = [];
+  for (let channel of channels) {
+    let obj = {};
+    obj.telegram_channel_id = Number(channel.id.value);
+    obj.channel_name = channel.title;
+    arr.push(obj);
+  }
+
+  let compared = await compareChannels(arr);
+  if (compared?.length) {
+    console.log(
+      "Some of the subscribed channels have not been saved to the database. Do you want to add them?",
+    );
+    // if yes then invoke saveChannels on the missing entries. Else continue
+  }
+
+  // choose a channel from which they want to fetch messages from and populate the database. Of course check whether channel is saved in db
 }
 
 // we now need to compare the channels they have with the ones in database. But first we need to fetch from database
