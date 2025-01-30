@@ -33,7 +33,7 @@ export const compareChannels = async (
     let query =
       await db.execute(sql`WITH temp_table(telegram_channel_id, channel_name) AS
       (SELECT *
-       FROM jsonb_to_recordset(to_jsonb(tel_channels)) AS x(telegram_channel_id bigint, channel_name varchar(255))),
+       FROM jsonb_to_recordset(${JSON.stringify(tel_channels)}) AS x(telegram_channel_id bigint, channel_name varchar(255))),
          current_table(telegram_channel_id, channel_name) AS
       (SELECT telegram_channel_id,
               channel_name
