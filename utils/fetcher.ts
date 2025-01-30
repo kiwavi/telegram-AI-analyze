@@ -46,7 +46,7 @@ const getChannels = async (): Promise<string[]> => {
 };
 
 let channels = await getChannels();
-let channelsArr: string[] = [];
+let channelsArr: { name: string; value: bigint; description: string }[] = [];
 let all_channels = await allChannels();
 
 // this should only handle saving channels in db and returning them. Return channelsArr
@@ -60,7 +60,7 @@ if (!all_channels?.length) {
     let refetchChannels = await allChannels();
     for (let chn of refetchChannels) {
       console.log(chn);
-      let obj = {};
+      let obj: { name: string; value: bigint; description: string } = {};
       obj.name = chn.channel_name;
       obj.value = chn.telegram_channel_id;
       obj.description = chn.channel_name;
@@ -76,7 +76,7 @@ if (!all_channels?.length) {
   // they have channels in db. confirm whether some are not in db and inform user
   let arr = [];
   for (let channel of channels) {
-    let obj = {};
+    let obj: { telegram_channel_id: bigint; channel_name: string } = {};
     obj.telegram_channel_id = Number(channel.id.value);
     obj.channel_name = channel.title;
     arr.push(obj);
@@ -122,7 +122,7 @@ if (!all_channels?.length) {
     }
   } else {
     for (let chn of all_channels) {
-      let obj = {};
+      let obj: { name: string; value: number; description: string } = {};
       obj.name = chn.channel_name;
       obj.value = chn.telegram_channel_id;
       obj.description = chn.channel_name;
