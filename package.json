@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@inquirer/prompts": "^7.2.4",
     "cli-select": "^1.1.2",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.38.4",
