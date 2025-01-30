@@ -78,7 +78,7 @@ if (!allChannels?.length) {
     // if yes then invoke saveChannels on the missing entries. Else continue
   }
 
-  // choose a channel from which they want to fetch messages from and populate the database. Of course check whether channel is saved in db
+  // choose a channel from which they want to fetch messages from and populate the database. Of course check whether channel is saved in db.
 }
 
 // we now need to compare the channels they have with the ones in database. But first we need to fetch from database
