@@ -3,7 +3,9 @@ import { db } from "../../index";
 import { channels } from "../schema";
 import { sql } from "drizzle-orm";
 
-export const allChannels = await db.select().from(channels);
+export const allChannels = async () => {
+  return await db.select().from(channels);
+};
 
 export const saveChannels = async (tel_channels: string[]) => {
   // take in a list of channels and iterate through them while saving them
