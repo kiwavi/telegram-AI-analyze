@@ -7,6 +7,7 @@ import {
   compareChannels,
   saveChannels,
 } from "../src/db/models/channels";
+import { select, Separator } from "@inquirer/prompts";
 
 dotenv.config();
 
@@ -71,12 +72,61 @@ if (!allChannels?.length) {
   }
 
   let compared = await compareChannels(arr);
-  if (compared?.length) {
+  let channelsArr: string[] = [];
+  console.log(compared);
+  if (compared?.rows?.length) {
     console.log(
       "Some of the subscribed channels have not been saved to the database. Do you want to add them?",
     );
-    // if yes then invoke saveChannels on the missing entries. Else continue
+    const answer = await select({
+      message: "Do you want to save these channels",
+      choices: [
+        {
+          name: "Yes",
+          value: 1,
+          description: "Positive",
+        },
+        {
+          name: "No",
+          value: 0,
+          description: "Negative",
+        },
+      ],
+      default: "Yes",
+    });
+
+    if (answer) {
+      console.log("saving channels");
+      let channelsToSave = compared.rows;
+      await saveChannels(channelsToSave);
+    }
+
+    for (let chn of allChannels) {
+      let obj = {};
+      obj.name = chn.channel_name;
+      obj.value = chn.telegram_channel_id;
+      obj.description = chn.channel_name;
+      channelsArr.push(obj);
+    }
+  } else {
+    for (let chn of allChannels) {
+      let obj = {};
+      obj.name = chn.channel_name;
+      obj.value = chn.telegram_channel_id;
+      obj.description = chn.channel_name;
+      channelsArr.push(obj);
+    }
   }
+
+  const channelsToQuery = await select({
+    message: "Which channel do you want to fetch data from?",
+    choices: channelsArr,
+    default: channelsArr[0].name,
+  });
+
+  // ask which channel they want to fetch info from so that we can call telegram to fetch the info. Get the channels from currently saved channels
+
+  // if yes then invoke saveChannels on the missing entries. Else continue
 
   // choose a channel from which they want to fetch messages from and populate the database. Of course check whether channel is saved in db.
 }
