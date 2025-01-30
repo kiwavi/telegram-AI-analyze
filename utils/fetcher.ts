@@ -46,15 +46,26 @@ const getChannels = async (): Promise<string[]> => {
 };
 
 let channels = await getChannels();
+let channelsArr: string[] = [];
+let all_channels = await allChannels();
 
-if (!allChannels?.length) {
+// this should only handle saving channels in db and returning them. Return channelsArr
+if (!all_channels?.length) {
   // if no channels in db
   console.log("There are no saved channels");
   console.log(channels);
   if (channels?.length) {
     console.log("Saving channels");
     let res = await saveChannels(channels);
-    console.log(res);
+    let refetchChannels = await allChannels();
+    for (let chn of refetchChannels) {
+      console.log(chn);
+      let obj = {};
+      obj.name = chn.channel_name;
+      obj.value = chn.telegram_channel_id;
+      obj.description = chn.channel_name;
+      channelsArr.push(obj);
+    }
   } else {
     console.log(
       "You are not subscribed to any channels. Please subscribe first",
@@ -72,7 +83,6 @@ if (!allChannels?.length) {
   }
 
   let compared = await compareChannels(arr);
-  let channelsArr: string[] = [];
   console.log(compared);
   if (compared?.rows?.length) {
     console.log(
@@ -101,15 +111,17 @@ if (!allChannels?.length) {
       await saveChannels(channelsToSave);
     }
 
-    for (let chn of allChannels) {
-      let obj = {};
+    let refetchChannels = await allChannels();
+
+    for (let chn of refetchChannels) {
+      let obj: { name: string; value: number; description: string } = {};
       obj.name = chn.channel_name;
       obj.value = chn.telegram_channel_id;
       obj.description = chn.channel_name;
       channelsArr.push(obj);
     }
   } else {
-    for (let chn of allChannels) {
+    for (let chn of all_channels) {
       let obj = {};
       obj.name = chn.channel_name;
       obj.value = chn.telegram_channel_id;
@@ -118,18 +130,20 @@ if (!allChannels?.length) {
     }
   }
 
-  const channelsToQuery = await select({
-    message: "Which channel do you want to fetch data from?",
-    choices: channelsArr,
-    default: channelsArr[0].name,
-  });
-
   // ask which channel they want to fetch info from so that we can call telegram to fetch the info. Get the channels from currently saved channels
 
   // if yes then invoke saveChannels on the missing entries. Else continue
 
   // choose a channel from which they want to fetch messages from and populate the database. Of course check whether channel is saved in db.
 }
+
+const channelsToQuery = await select({
+  message: "Which channel do you want to fetch data from?",
+  choices: channelsArr,
+  default: channelsArr[0].name,
+});
+
+console.log("You have successfully chosen a channel");
 
 // we now need to compare the channels they have with the ones in database. But first we need to fetch from database
 
