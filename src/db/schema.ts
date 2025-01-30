@@ -33,6 +33,7 @@ export const messages = pgTable("messages", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   message: text().notNull(),
   telegram_message_id: integer(),
+  telegram_created_at: timestamp("telegram_created_at").notNull(),
   created_at: timestamp("created_at").notNull().defaultNow(),
   updated_at: timestamp("updated_at")
     .notNull()
