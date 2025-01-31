@@ -160,13 +160,15 @@ let extractDialogEntity = dialogs.find(
 
 let messages = await fetchChannelMessages(client, extractDialogEntity);
 
-console.log(JSON.stringify(messages));
+// console.log(JSON.stringify(messages));
 
 let channelsRefetch = await allChannels();
 
 let channelId: number = channelsRefetch.find(
   (nm) => Number(nm.telegram_channel_id) == Number(channelsToQuery),
 )?.id;
+
+console.log(messages.length);
 
 let savedMessages = await saveMessages(JSON.stringify(messages), channelId);
 

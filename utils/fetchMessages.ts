@@ -5,7 +5,7 @@ export const fetchChannelMessages = async (
   let messages = await client.getMessages(channelEntity, {
     limit: undefined,
     waitTime: 10,
-    search: "Communist",
+    // search: "Communist",
   });
 
   return messages;
