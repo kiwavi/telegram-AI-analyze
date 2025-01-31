@@ -8,6 +8,7 @@ import {
   saveChannels,
 } from "../src/db/models/channels";
 import { select, Separator } from "@inquirer/prompts";
+import { fetchChannelMessages } from "./fetchMessages";
 
 dotenv.config();
 
@@ -39,8 +40,9 @@ await client.start({
 });
 console.log("You should now be connected.");
 
+let dialogs = await client.getDialogs({});
+
 const getChannels = async (): Promise<string[]> => {
-  const dialogs = await client.getDialogs({});
   let channels = dialogs.filter((nm) => nm.isChannel);
   return channels;
 };
@@ -137,13 +139,31 @@ if (!all_channels?.length) {
   // choose a channel from which they want to fetch messages from and populate the database. Of course check whether channel is saved in db.
 }
 
-const channelsToQuery = await select({
+const channelsToQuery: bigint = await select({
   message: "Which channel do you want to fetch data from?",
   choices: channelsArr,
   default: channelsArr[0].name,
 });
 
 console.log("You have successfully chosen a channel");
+
+if (!channelsToQuery) {
+  throw new Error("You must choose a channel in order to continue");
+}
+
+console.log(channelsToQuery);
+
+let extractDialogEntity = dialogs.find(
+  (nm) => Number(nm.id) == Number(channelsToQuery),
+)?.entity;
+
+let messages = await fetchChannelMessages(client, extractDialogEntity);
+
+console.log(JSON.stringify(messages));
+
+// var result = messages.map((obj) => ({ owners: obj["owners"] }));
+
+// call function that fetches data
 
 // we now need to compare the channels they have with the ones in database. But first we need to fetch from database
 
