@@ -9,6 +9,7 @@ import {
 } from "../src/db/models/channels";
 import { select, Separator } from "@inquirer/prompts";
 import { fetchChannelMessages } from "./fetchMessages";
+import { saveMessages } from "../src/db/models/messages";
 
 dotenv.config();
 
@@ -161,29 +162,12 @@ let messages = await fetchChannelMessages(client, extractDialogEntity);
 
 console.log(JSON.stringify(messages));
 
-// var result = messages.map((obj) => ({ owners: obj["owners"] }));
+let channelsRefetch = await allChannels();
 
-// call function that fetches data
+let channelId: number = channelsRefetch.find(
+  (nm) => Number(nm.telegram_channel_id) == Number(channelsToQuery),
+)?.id;
 
-// we now need to compare the channels they have with the ones in database. But first we need to fetch from database
+let savedMessages = await saveMessages(JSON.stringify(messages), channelId);
 
-// fetch those channels.
-
-// const dialogs = await client.getDialogs({});
-
-// let rt_dialo_id = dialogs.find((nm) => nm.name === "RT News")?.entity;
-
-// let messages = await client.getMessages(rt_dialo_id, {
-//   limit: undefined,
-//   waitTime: 10,
-// });
-
-// let filteredMessages = [];
-
-// for (let msg of messages) {
-//   if (new Date(msg.date * 1000) > new Date("2023-10-07T00:29:02.000Z")) {
-//     filteredMessages.push(msg);
-//   }
-// }
-
-// The channel, searchString should preferably be dynamic
+console.log("Messages saved successfully");

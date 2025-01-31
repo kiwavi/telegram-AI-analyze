@@ -3,7 +3,7 @@ export const fetchChannelMessages = async (
   channelEntity,
 ): Promise<string[]> => {
   let messages = await client.getMessages(channelEntity, {
-    limit: 1,
+    limit: undefined,
     waitTime: 10,
     search: "Communist",
   });
