@@ -10,6 +10,7 @@ import {
 import { select, Separator } from "@inquirer/prompts";
 import { fetchChannelMessages } from "./fetchMessages";
 import { saveMessages } from "../src/db/models/messages";
+import _ from "lodash";
 
 dotenv.config();
 
@@ -170,6 +171,11 @@ let channelId: number = channelsRefetch.find(
 
 console.log(messages.length);
 
-let savedMessages = await saveMessages(JSON.stringify(messages), channelId);
+let chunks = _.chunk(messages, 10000);
+
+for (let chn of chunks) {
+  let savedMessages = await saveMessages(JSON.stringify(chn), channelId);
+}
+// convert the messages into chunks
 
 console.log("Messages saved successfully");
