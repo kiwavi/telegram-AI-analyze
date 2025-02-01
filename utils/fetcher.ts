@@ -171,7 +171,7 @@ let channelId: number = channelsRefetch.find(
 
 console.log(messages.length);
 
-let chunks = _.chunk(messages, 10000);
+let chunks = _.chunk(messages, 5000);
 
 for (let chn of chunks) {
   let savedMessages = await saveMessages(JSON.stringify(chn), channelId);
