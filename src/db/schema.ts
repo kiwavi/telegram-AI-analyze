@@ -40,7 +40,9 @@ export const messages = pgTable("messages", {
     .default(sql`CURRENT_TIMESTAMP`)
     .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
   deleted_at: timestamp("deleted_at"),
-  channel_id: integer()
+  channel_id: bigint("channel_id", {
+    mode: "bigint",
+  })
     .notNull()
     .references(() => channels.id),
 });

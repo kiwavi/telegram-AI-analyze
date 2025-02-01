@@ -8,6 +8,9 @@ import {
   saveChannels,
 } from "../src/db/models/channels";
 import { select, Separator } from "@inquirer/prompts";
+import { fetchChannelMessages } from "./fetchMessages";
+import { saveMessages } from "../src/db/models/messages";
+import _ from "lodash";
 
 dotenv.config();
 
@@ -39,8 +42,9 @@ await client.start({
 });
 console.log("You should now be connected.");
 
+let dialogs = await client.getDialogs({});
+
 const getChannels = async (): Promise<string[]> => {
-  const dialogs = await client.getDialogs({});
   let channels = dialogs.filter((nm) => nm.isChannel);
   return channels;
 };
@@ -137,7 +141,7 @@ if (!all_channels?.length) {
   // choose a channel from which they want to fetch messages from and populate the database. Of course check whether channel is saved in db.
 }
 
-const channelsToQuery = await select({
+const channelsToQuery: bigint = await select({
   message: "Which channel do you want to fetch data from?",
   choices: channelsArr,
   default: channelsArr[0].name,
@@ -145,25 +149,33 @@ const channelsToQuery = await select({
 
 console.log("You have successfully chosen a channel");
 
-// we now need to compare the channels they have with the ones in database. But first we need to fetch from database
+if (!channelsToQuery) {
+  throw new Error("You must choose a channel in order to continue");
+}
 
-// fetch those channels.
+console.log(channelsToQuery);
 
-// const dialogs = await client.getDialogs({});
+let extractDialogEntity = dialogs.find(
+  (nm) => Number(nm.id) == Number(channelsToQuery),
+)?.entity;
 
-// let rt_dialo_id = dialogs.find((nm) => nm.name === "RT News")?.entity;
+let messages = await fetchChannelMessages(client, extractDialogEntity);
 
-// let messages = await client.getMessages(rt_dialo_id, {
-//   limit: undefined,
-//   waitTime: 10,
-// });
+// console.log(JSON.stringify(messages));
 
-// let filteredMessages = [];
+let channelsRefetch = await allChannels();
 
-// for (let msg of messages) {
-//   if (new Date(msg.date * 1000) > new Date("2023-10-07T00:29:02.000Z")) {
-//     filteredMessages.push(msg);
-//   }
-// }
+let channelId: number = channelsRefetch.find(
+  (nm) => Number(nm.telegram_channel_id) == Number(channelsToQuery),
+)?.id;
 
-// The channel, searchString should preferably be dynamic
+console.log(messages.length);
+
+let chunks = _.chunk(messages, 10000);
+
+for (let chn of chunks) {
+  let savedMessages = await saveMessages(JSON.stringify(chn), channelId);
+}
+// convert the messages into chunks
+
+console.log("Messages saved successfully");
