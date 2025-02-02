@@ -8,6 +8,7 @@ import {
   unique,
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
+import { uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const channels = pgTable("channels", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -29,23 +30,31 @@ export const channelsRelations = relations(channels, ({ many }) => ({
   messages: many(messages),
 }));
 
-export const messages = pgTable("messages", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  message: text().notNull(),
-  telegram_message_id: integer(),
-  telegram_created_at: timestamp("telegram_created_at").notNull(),
-  created_at: timestamp("created_at").notNull().defaultNow(),
-  updated_at: timestamp("updated_at")
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`)
-    .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
-  deleted_at: timestamp("deleted_at"),
-  channel_id: bigint("channel_id", {
-    mode: "bigint",
-  })
-    .notNull()
-    .references(() => channels.id),
-});
+export const messages = pgTable(
+  "messages",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    message: text().notNull(),
+    telegram_message_id: integer(),
+    telegram_created_at: timestamp("telegram_created_at").notNull(),
+    created_at: timestamp("created_at").notNull().defaultNow(),
+    updated_at: timestamp("updated_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
+    deleted_at: timestamp("deleted_at"),
+    channel_id: bigint("channel_id", {
+      mode: "bigint",
+    })
+      .notNull()
+      .references(() => channels.id),
+  },
+  (t) => [
+    unique("channel_messages_unique")
+      .on(t.channel_id, t.telegram_message_id)
+      .nullsNotDistinct(),
+  ],
+);
 
 export const messagesRelations = relations(messages, ({ one }) => ({
   channel: one(channels, {
