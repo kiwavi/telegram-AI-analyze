@@ -12,6 +12,9 @@ import { fetchChannelMessages } from "./fetchMessages";
 import { saveMessages } from "../src/db/models/messages";
 import _ from "lodash";
 import { fetchAllQuestions, saveQuestion } from "../src/db/models/questions";
+import promptSync from "prompt-sync";
+
+const prompt = promptSync();
 
 dotenv.config();
 
@@ -206,6 +209,11 @@ if (Object.is(answer, 2)) {
   if (!questions?.length) {
     // have them add a question
     console.log("You do not have any questions yet");
+    const question = prompt("What is your question?");
+
+    let savedQuestion = await saveQuestion(question);
+
+    console.log(savedQuestion);
   } else {
     // let them choose from existing questions or add a new question.
   }
