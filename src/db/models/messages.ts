@@ -12,7 +12,7 @@ export const saveMessages = async (messages: string, channel_id: number) => {
      FROM jsonb_to_recordset(${messages}) AS x(message text,telegram_message_id bigint,channel_id bigint,telegram_created_at date, id bigint, "peerId" JSONB, date int))
   INSERT INTO messages(message, telegram_message_id, channel_id, telegram_created_at)
     (SELECT *
-     FROM temp_table where message is not null and message != '');`);
+     FROM temp_table where message is not null and message != '') ON CONFLICT DO NOTHING;`);
   console.log(res);
   return res;
 };
