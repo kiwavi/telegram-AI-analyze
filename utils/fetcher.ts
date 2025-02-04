@@ -11,7 +11,11 @@ import { select, Separator } from "@inquirer/prompts";
 import { fetchChannelMessages } from "./fetchMessages";
 import { saveMessages } from "../src/db/models/messages";
 import _ from "lodash";
-import { fetchAllQuestions, saveQuestion } from "../src/db/models/questions";
+import {
+  fetchAllQuestions,
+  fetchQuestion,
+  saveQuestion,
+} from "../src/db/models/questions";
 import promptSync from "prompt-sync";
 
 const prompt = promptSync();
@@ -203,18 +207,58 @@ if (Object.is(answer, 1)) {
   console.log("Messages saved successfully");
 }
 
+let savedQuestion: string[];
+
 if (Object.is(answer, 2)) {
-  // fetch existing questions and display them. If none then tell them to add a question
-  let questions = await fetchAllQuestions();
+  // fetch existing questions and display them. If none then tell them to add a question. generally returns a question
+  let questions: string[] = await fetchAllQuestions();
   if (!questions?.length) {
     // have them add a question
     console.log("You do not have any questions yet");
     const question = prompt("What is your question?");
 
-    let savedQuestion = await saveQuestion(question);
+    savedQuestion = await saveQuestion(question);
 
     console.log(savedQuestion);
   } else {
-    // let them choose from existing questions or add a new question.
+    const answer = await select({
+      message: "Which action do you want to do?",
+      choices: [
+        {
+          name: "Ask new question",
+          value: 1,
+          description: "New",
+        },
+        {
+          name: "Ask existing question",
+          value: 2,
+          description: "Existing",
+        },
+      ],
+      default: "Ask existing question",
+    });
+
+    if (Object.is(answer, 1)) {
+      const question = prompt("What is your question?");
+      savedQuestion = await saveQuestion(question);
+      console.log(savedQuestion);
+    } else {
+      let choices = [];
+      for (let q of questions) {
+        choices.push({
+          name: q.question,
+          value: q.id,
+          description: q.question,
+        });
+      }
+      const answer = await select({
+        message: "Which action do you want to do?",
+        choices,
+        default: choices[0].value,
+      });
+      // fetch the chosen question from db
+      savedQuestion = await fetchQuestion(answer);
+      console.log(savedQuestion);
+    }
   }
 }
