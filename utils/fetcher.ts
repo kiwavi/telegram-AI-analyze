@@ -11,11 +11,19 @@ import { select, Separator } from "@inquirer/prompts";
 import { fetchChannelMessages } from "./fetchMessages";
 import { saveMessages } from "../src/db/models/messages";
 import _ from "lodash";
+import {
+  fetchAllQuestions,
+  fetchQuestion,
+  saveQuestion,
+} from "../src/db/models/questions";
+import promptSync from "prompt-sync";
+
+const prompt = promptSync();
 
 dotenv.config();
 
 let apiId = process.env.API_ID;
-const apiHash = process.env.API_HASH;
+const apiHash: string = process.env.API_HASH;
 
 // Use the Methods Methods
 const rl = readline.createInterface({
@@ -23,7 +31,12 @@ const rl = readline.createInterface({
   output: process.stdout,
 });
 
-const client = new TelegramClient(new StringSession(""), apiId, apiHash, {});
+const client = new TelegramClient(
+  new StringSession(""),
+  Number(apiId),
+  apiHash,
+  {},
+);
 
 await client.start({
   phoneNumber: async () =>
@@ -133,49 +146,119 @@ if (!all_channels?.length) {
       channelsArr.push(obj);
     }
   }
-
-  // ask which channel they want to fetch info from so that we can call telegram to fetch the info. Get the channels from currently saved channels
-
-  // if yes then invoke saveChannels on the missing entries. Else continue
-
-  // choose a channel from which they want to fetch messages from and populate the database. Of course check whether channel is saved in db.
 }
 
-const channelsToQuery: bigint = await select({
-  message: "Which channel do you want to fetch data from?",
-  choices: channelsArr,
-  default: channelsArr[0].name,
+// at this point they have channels and can either fetch data from channels or ask questions based on messages.
+const answer = await select({
+  message: "Which action do you want to do?",
+  choices: [
+    {
+      name: "Fetch data from channels",
+      value: 1,
+      description: "Fetch data",
+    },
+    {
+      name: "Query AI about the contents of a specific channel",
+      value: 2,
+      description: "Query AI",
+    },
+  ],
+  default: "Fetch data from channels",
 });
 
-console.log("You have successfully chosen a channel");
+if (Object.is(answer, 1)) {
+  const channelsToQuery: bigint = await select({
+    message: "Which channel do you want to fetch data from?",
+    choices: channelsArr,
+    default: channelsArr[0].name,
+  });
 
-if (!channelsToQuery) {
-  throw new Error("You must choose a channel in order to continue");
+  console.log("You have successfully chosen a channel");
+
+  if (!channelsToQuery) {
+    throw new Error("You must choose a channel in order to continue");
+  }
+
+  console.log(channelsToQuery);
+
+  let extractDialogEntity = dialogs.find(
+    (nm) => Number(nm.id) == Number(channelsToQuery),
+  )?.entity;
+
+  let messages = await fetchChannelMessages(client, extractDialogEntity);
+
+  // console.log(JSON.stringify(messages));
+
+  let channelsRefetch = await allChannels();
+
+  let channelId: number = channelsRefetch.find(
+    (nm) => Number(nm.telegram_channel_id) == Number(channelsToQuery),
+  )?.id;
+
+  console.log(messages.length);
+
+  let chunks = _.chunk(messages, 5000);
+
+  for (let chn of chunks) {
+    let savedMessages = await saveMessages(JSON.stringify(chn), channelId);
+  }
+  // convert the messages into chunks
+
+  console.log("Messages saved successfully");
 }
 
-console.log(channelsToQuery);
+let savedQuestion: string[];
 
-let extractDialogEntity = dialogs.find(
-  (nm) => Number(nm.id) == Number(channelsToQuery),
-)?.entity;
+if (Object.is(answer, 2)) {
+  // fetch existing questions and display them. If none then tell them to add a question. generally returns a question
+  let questions: string[] = await fetchAllQuestions();
+  if (!questions?.length) {
+    // have them add a question
+    console.log("You do not have any questions yet");
+    const question = prompt("What is your question?");
 
-let messages = await fetchChannelMessages(client, extractDialogEntity);
+    savedQuestion = await saveQuestion(question);
 
-// console.log(JSON.stringify(messages));
+    console.log(savedQuestion);
+  } else {
+    const answer = await select({
+      message: "Which action do you want to do?",
+      choices: [
+        {
+          name: "Ask new question",
+          value: 1,
+          description: "New",
+        },
+        {
+          name: "Ask existing question",
+          value: 2,
+          description: "Existing",
+        },
+      ],
+      default: "Ask existing question",
+    });
 
-let channelsRefetch = await allChannels();
-
-let channelId: number = channelsRefetch.find(
-  (nm) => Number(nm.telegram_channel_id) == Number(channelsToQuery),
-)?.id;
-
-console.log(messages.length);
-
-let chunks = _.chunk(messages, 5000);
-
-for (let chn of chunks) {
-  let savedMessages = await saveMessages(JSON.stringify(chn), channelId);
+    if (Object.is(answer, 1)) {
+      const question = prompt("What is your question?");
+      savedQuestion = await saveQuestion(question);
+      console.log(savedQuestion);
+    } else {
+      let choices = [];
+      for (let q of questions) {
+        choices.push({
+          name: q.question,
+          value: q.id,
+          description: q.question,
+        });
+      }
+      const answer = await select({
+        message: "Which action do you want to do?",
+        choices,
+        default: choices[0].value,
+      });
+      // fetch the chosen question from db
+      savedQuestion = await fetchQuestion(answer);
+      console.log(savedQuestion);
+    }
+  }
 }
-// convert the messages into chunks
-
-console.log("Messages saved successfully");

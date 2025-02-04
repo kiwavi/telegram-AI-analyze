@@ -69,7 +69,7 @@ export const messagesRelationsToAnswers = relations(messages, ({ many }) => ({
 
 export const questions = pgTable("questions", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  question: text().notNull(),
+  question: text().notNull().unique(),
   created_at: timestamp("created_at").notNull().defaultNow(),
   updated_at: timestamp("updated_at")
     .notNull()
