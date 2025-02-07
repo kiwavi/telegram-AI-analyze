@@ -2,7 +2,15 @@ import { db } from "../../index";
 import { questions } from "../schema";
 import { eq } from "drizzle-orm";
 
-export const fetchAllQuestions = async (): Promise<object[]> => {
+export const fetchAllQuestions = async (): Promise<
+  {
+    id: number;
+    created_at: Date;
+    updated_at: Date;
+    deleted_at: Date | null;
+    question: string;
+  }[]
+> => {
   let res;
   res = await db.select().from(questions);
   return res;

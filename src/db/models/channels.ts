@@ -5,7 +5,9 @@ import { channels } from "../schema";
 import { sql } from "drizzle-orm";
 
 export const allChannels = async () => {
-  return await db.select().from(channels);
+  let res;
+  res = await db.select().from(channels);
+  return res;
 };
 
 export const saveChannels = async (tel_channels: Dialog[]) => {

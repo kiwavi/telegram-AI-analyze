@@ -64,7 +64,8 @@ const getChannels = async (): Promise<Dialog[]> => {
 };
 
 let channels = await getChannels();
-let channelsArr: { name: string; value: bigint; description: string }[] = [];
+let channelsArr: { name: string; value: bigint | null; description: string }[] =
+  [];
 let all_channels = await allChannels();
 
 // this should only handle saving channels in db and returning them. Return channelsArr
@@ -78,7 +79,7 @@ if (!all_channels?.length) {
     let refetchChannels = await allChannels();
     for (let chn of refetchChannels) {
       console.log(chn);
-      let obj: { name: string; value: bigint; description: string } = {
+      let obj: { name: string; value: bigint | null; description: string } = {
         name: chn.channel_name,
         value: chn.telegram_channel_id,
         description: chn.channel_name,
@@ -96,10 +97,11 @@ if (!all_channels?.length) {
   // they have channels in db. confirm whether some are not in db and inform user
   let arr: object[] = [];
   for (let channel of channels) {
-    let obj: { telegram_channel_id: bigint; channel_name: string } = {
-      telegram_channel_id: Number(channel.id.value),
-      channel_name: channel.title,
-    };
+    let obj: { telegram_channel_id: number; channel_name: string | undefined } =
+      {
+        telegram_channel_id: Number(channel.id.value),
+        channel_name: channel.title,
+      };
     arr.push(obj);
   }
 
@@ -135,7 +137,7 @@ if (!all_channels?.length) {
     let refetchChannels = await allChannels();
 
     for (let chn of refetchChannels) {
-      let obj: { name: string; value: bigint; description: string } = {
+      let obj: { name: string; value: bigint | null; description: string } = {
         name: chn.channel_name,
         value: chn.telegram_channel_id,
         description: chn.channel_name,
@@ -145,7 +147,7 @@ if (!all_channels?.length) {
     }
   } else {
     for (let chn of all_channels) {
-      let obj: { name: string; value: number; description: string } = {
+      let obj: { name: string; value: bigint | null; description: string } = {
         name: chn.channel_name,
         value: chn.telegram_channel_id,
         description: chn.channel_name,
@@ -174,7 +176,7 @@ const answer = await select({
 });
 
 if (Object.is(answer, 1)) {
-  const channelsToQuery: bigint = await select({
+  const channelsToQuery: bigint | null = await select({
     message: "Which channel do you want to fetch data from?",
     choices: channelsArr,
     default: channelsArr[0].name,
@@ -200,7 +202,7 @@ if (Object.is(answer, 1)) {
 
   let channelId: number = channelsRefetch.find(
     (nm) => Number(nm.telegram_channel_id) == Number(channelsToQuery),
-  )?.id;
+  )?.id as number;
 
   console.log(messages.length);
 
@@ -218,7 +220,13 @@ let savedQuestion: object[];
 
 if (Object.is(answer, 2)) {
   // fetch existing questions and display them. If none then tell them to add a question. generally returns a question
-  let questions: object[] = await fetchAllQuestions();
+  let questions: {
+    id: number;
+    created_at: Date;
+    updated_at: Date;
+    deleted_at: Date | null;
+    question: string;
+  }[] = await fetchAllQuestions();
   if (!questions?.length) {
     // have them add a question
     console.log("You do not have any questions yet");
