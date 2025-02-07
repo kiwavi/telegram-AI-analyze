@@ -17,13 +17,14 @@ import {
   saveQuestion,
 } from "../src/db/models/questions";
 import promptSync from "prompt-sync";
+import { Dialog } from "telegram/tl/custom/dialog";
 
 const prompt = promptSync();
 
 dotenv.config();
 
 let apiId = process.env.API_ID;
-const apiHash: string = process.env.API_HASH;
+const apiHash = process.env.API_HASH as string;
 
 // Use the Methods Methods
 const rl = readline.createInterface({
@@ -57,7 +58,7 @@ console.log("You should now be connected.");
 
 let dialogs = await client.getDialogs({});
 
-const getChannels = async (): Promise<string[]> => {
+const getChannels = async (): Promise<Dialog[]> => {
   let channels = dialogs.filter((nm) => nm.isChannel);
   return channels;
 };
@@ -77,10 +78,12 @@ if (!all_channels?.length) {
     let refetchChannels = await allChannels();
     for (let chn of refetchChannels) {
       console.log(chn);
-      let obj: { name: string; value: bigint; description: string } = {};
-      obj.name = chn.channel_name;
-      obj.value = chn.telegram_channel_id;
-      obj.description = chn.channel_name;
+      let obj: { name: string; value: bigint; description: string } = {
+        name: chn.channel_name,
+        value: chn.telegram_channel_id,
+        description: chn.channel_name,
+      };
+
       channelsArr.push(obj);
     }
   } else {
@@ -91,11 +94,12 @@ if (!all_channels?.length) {
   }
 } else {
   // they have channels in db. confirm whether some are not in db and inform user
-  let arr = [];
+  let arr: object[] = [];
   for (let channel of channels) {
-    let obj: { telegram_channel_id: bigint; channel_name: string } = {};
-    obj.telegram_channel_id = Number(channel.id.value);
-    obj.channel_name = channel.title;
+    let obj: { telegram_channel_id: bigint; channel_name: string } = {
+      telegram_channel_id: Number(channel.id.value),
+      channel_name: channel.title,
+    };
     arr.push(obj);
   }
 
@@ -131,18 +135,21 @@ if (!all_channels?.length) {
     let refetchChannels = await allChannels();
 
     for (let chn of refetchChannels) {
-      let obj: { name: string; value: number; description: string } = {};
-      obj.name = chn.channel_name;
-      obj.value = chn.telegram_channel_id;
-      obj.description = chn.channel_name;
+      let obj: { name: string; value: bigint; description: string } = {
+        name: chn.channel_name,
+        value: chn.telegram_channel_id,
+        description: chn.channel_name,
+      };
+
       channelsArr.push(obj);
     }
   } else {
     for (let chn of all_channels) {
-      let obj: { name: string; value: number; description: string } = {};
-      obj.name = chn.channel_name;
-      obj.value = chn.telegram_channel_id;
-      obj.description = chn.channel_name;
+      let obj: { name: string; value: number; description: string } = {
+        name: chn.channel_name,
+        value: chn.telegram_channel_id,
+        description: chn.channel_name,
+      };
       channelsArr.push(obj);
     }
   }
@@ -207,11 +214,11 @@ if (Object.is(answer, 1)) {
   console.log("Messages saved successfully");
 }
 
-let savedQuestion: string[];
+let savedQuestion: object[];
 
 if (Object.is(answer, 2)) {
   // fetch existing questions and display them. If none then tell them to add a question. generally returns a question
-  let questions: string[] = await fetchAllQuestions();
+  let questions: object[] = await fetchAllQuestions();
   if (!questions?.length) {
     // have them add a question
     console.log("You do not have any questions yet");
@@ -243,7 +250,11 @@ if (Object.is(answer, 2)) {
       savedQuestion = await saveQuestion(question);
       console.log(savedQuestion);
     } else {
-      let choices = [];
+      let choices: {
+        name: string;
+        value: number;
+        description: string;
+      }[] = [];
       for (let q of questions) {
         choices.push({
           name: q.question,

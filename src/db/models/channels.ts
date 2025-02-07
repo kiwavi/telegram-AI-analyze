@@ -29,7 +29,7 @@ export const saveChannels = async (tel_channels: string[]) => {
 };
 
 export const compareChannels = async (
-  tel_channels: string[],
+  tel_channels: object[],
 ): Promise<string[]> => {
   if (tel_channels?.length) {
     let query =
