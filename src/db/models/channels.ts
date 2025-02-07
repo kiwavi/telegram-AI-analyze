@@ -7,14 +7,15 @@ export const allChannels = async () => {
   return await db.select().from(channels);
 };
 
-export const saveChannels = async (tel_channels: string[]) => {
+export const saveChannels = async (tel_channels: object[]) => {
   // take in a list of channels and iterate through them while saving them
   let arr = [];
   let res;
   for (let channel of tel_channels) {
-    let obj = {};
-    obj.telegram_channel_id = channel?.id?.value || channel.telegram_channel_id;
-    obj.channel_name = channel?.title || channel.channel_name;
+    let obj: { telegram_channel_id: bigint; channel_name: string } = {
+      telegram_channel_id: channel?.id?.value || channel.telegram_channel_id,
+      channel_name: channel?.title || channel.channel_name,
+    };
     arr.push(obj);
   }
   if (arr.length) {
