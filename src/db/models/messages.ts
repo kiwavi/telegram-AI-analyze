@@ -1,5 +1,6 @@
 import { db } from "../../index";
-import { sql } from "drizzle-orm";
+import { sql, eq } from "drizzle-orm";
+import { messages } from "../schema";
 
 export const saveMessages = async (messages: string, channel_id: number) => {
   let res;
@@ -14,5 +15,14 @@ export const saveMessages = async (messages: string, channel_id: number) => {
     (SELECT *
      FROM temp_table where message is not null and message != '') ON CONFLICT DO NOTHING;`);
   console.log(res);
+  return res;
+};
+
+export const fetchChannelMessages = async (channelId: number) => {
+  let res;
+  res = await db
+    .select()
+    .from(messages)
+    .where(eq(messages.channel_id, channelId));
   return res;
 };

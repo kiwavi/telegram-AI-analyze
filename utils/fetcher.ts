@@ -298,6 +298,8 @@ if (Object.is(answer, 2)) {
     (ch) => (ch.value = channelsToQuery)
   )?.name;
 
+  let channelId = channelsArr.find((ch) => (ch.value = channelsToQuery))?.value;
+
   if (channelsToQuery) {
     console.log(savedQuestion);
     console.log(
