@@ -36,21 +36,21 @@ const client = new TelegramClient(
   new StringSession(""),
   Number(apiId),
   apiHash,
-  {},
+  {}
 );
 
 await client.start({
   phoneNumber: async () =>
     new Promise((resolve) =>
-      rl.question("Please enter your number: ", resolve),
+      rl.question("Please enter your number: ", resolve)
     ),
   password: async () =>
     new Promise((resolve) =>
-      rl.question("Please enter your password: ", resolve),
+      rl.question("Please enter your password: ", resolve)
     ),
   phoneCode: async () =>
     new Promise((resolve) =>
-      rl.question("Please enter the code you received: ", resolve),
+      rl.question("Please enter the code you received: ", resolve)
     ),
   onError: (err) => console.log(err),
 });
@@ -75,9 +75,9 @@ if (!all_channels?.length) {
   console.log(channels);
   if (channels?.length) {
     console.log("Saving channels");
-    let res = await saveChannels(channels);
-    let refetchChannels = await allChannels();
-    for (let chn of refetchChannels) {
+    await saveChannels(channels);
+    all_channels = await allChannels();
+    for (let chn of all_channels) {
       console.log(chn);
       let obj: { name: string; value: bigint | null; description: string } = {
         name: chn.channel_name,
@@ -89,7 +89,7 @@ if (!all_channels?.length) {
     }
   } else {
     console.log(
-      "You are not subscribed to any channels. Please subscribe first",
+      "You are not subscribed to any channels. Please subscribe first"
     );
     throw new Error("You are not subscribed to any channels.");
   }
@@ -109,7 +109,7 @@ if (!all_channels?.length) {
   console.log(compared);
   if (compared?.rows?.length) {
     console.log(
-      "Some of the subscribed channels have not been saved to the database. Do you want to add them?",
+      "Some of the subscribed channels have not been saved to the database. Do you want to add them?"
     );
     const answer = await select({
       message: "Do you want to save these channels",
@@ -134,9 +134,9 @@ if (!all_channels?.length) {
       await saveChannels(channelsToSave);
     }
 
-    let refetchChannels = await allChannels();
+    all_channels = await allChannels();
 
-    for (let chn of refetchChannels) {
+    for (let chn of all_channels) {
       let obj: { name: string; value: bigint | null; description: string } = {
         name: chn.channel_name,
         value: chn.telegram_channel_id,
@@ -191,17 +191,17 @@ if (Object.is(answer, 1)) {
   console.log(channelsToQuery);
 
   let extractDialogEntity = dialogs.find(
-    (nm) => Number(nm.id) == Number(channelsToQuery),
+    (nm) => Number(nm.id) == Number(channelsToQuery)
   )?.entity;
 
   let messages = await fetchChannelMessages(client, extractDialogEntity);
 
   // console.log(JSON.stringify(messages));
 
-  let channelsRefetch = await allChannels();
+  all_channels = await allChannels();
 
-  let channelId: number = channelsRefetch.find(
-    (nm) => Number(nm.telegram_channel_id) == Number(channelsToQuery),
+  let channelId: number = all_channels.find(
+    (nm) => Number(nm.telegram_channel_id) == Number(channelsToQuery)
   )?.id as number;
 
   console.log(messages.length);
@@ -216,7 +216,13 @@ if (Object.is(answer, 1)) {
   console.log("Messages saved successfully");
 }
 
-let savedQuestion: object[];
+let savedQuestion: {
+  id: number;
+  created_at: Date;
+  updated_at: Date;
+  deleted_at: Date | null;
+  question: string;
+}[];
 
 if (Object.is(answer, 2)) {
   // fetch existing questions and display them. If none then tell them to add a question. generally returns a question
@@ -279,5 +285,47 @@ if (Object.is(answer, 2)) {
       savedQuestion = await fetchQuestion(answer);
       console.log(savedQuestion);
     }
+  }
+
+  // now we apply the question to a channel
+  let channelsToQuery: bigint | null = await select({
+    message: "Which channel do you want to query AI about ?",
+    choices: channelsArr,
+    default: channelsArr[0].name,
+  });
+
+  let channelName = channelsArr.find(
+    (ch) => (ch.value = channelsToQuery)
+  )?.name;
+
+  if (channelsToQuery) {
+    console.log(savedQuestion);
+    console.log(
+      `You are about to ask ${savedQuestion[0].question} of all messages in ${channelName}`
+    );
+  }
+
+  const askAIAnswer = await select({
+    message: "Proceed?",
+    choices: [
+      {
+        name: "Yes",
+        value: 1,
+        description: "Yes",
+      },
+      {
+        name: "No",
+        value: 2,
+        description: "No",
+      },
+    ],
+    default: "Ask existing question",
+  });
+
+  if (Object.is(askAIAnswer, 1)) {
+    console.log("Fetching data from AI");
+    // call the function that sends the query to AI
+  } else {
+    // exit program
   }
 }
