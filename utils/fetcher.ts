@@ -18,6 +18,8 @@ import {
 } from "../src/db/models/questions";
 import promptSync from "prompt-sync";
 import { Dialog } from "telegram/tl/custom/dialog";
+import { InputLocations } from "./openai";
+import { fetchChannel } from "../src/db/models/channels";
 
 const prompt = promptSync();
 
@@ -179,7 +181,6 @@ if (Object.is(answer, 1)) {
   const channelsToQuery: bigint | null = await select({
     message: "Which channel do you want to fetch data from?",
     choices: channelsArr,
-    default: channelsArr[0].name,
   });
 
   console.log("You have successfully chosen a channel");
@@ -187,8 +188,6 @@ if (Object.is(answer, 1)) {
   if (!channelsToQuery) {
     throw new Error("You must choose a channel in order to continue");
   }
-
-  console.log(channelsToQuery);
 
   let extractDialogEntity = dialogs.find(
     (nm) => Number(nm.id) == Number(channelsToQuery)
@@ -291,14 +290,17 @@ if (Object.is(answer, 2)) {
   let channelsToQuery: bigint | null = await select({
     message: "Which channel do you want to query AI about ?",
     choices: channelsArr,
-    default: channelsArr[0].name,
   });
 
-  let channelName = channelsArr.find(
-    (ch) => (ch.value = channelsToQuery)
+  const channelName = channelsArr.find(
+    (element) => element.value == channelsToQuery
   )?.name;
 
-  let channelId = channelsArr.find((ch) => (ch.value = channelsToQuery))?.value;
+  const channelId = channelsArr.find(
+    (element) => element.value == channelsToQuery
+  )?.value;
+
+  let channelIdId = await fetchChannel(channelId);
 
   if (channelsToQuery) {
     console.log(savedQuestion);
@@ -327,6 +329,11 @@ if (Object.is(answer, 2)) {
   if (Object.is(askAIAnswer, 1)) {
     console.log("Fetching data from AI");
     // call the function that sends the query to AI
+    try {
+      await InputLocations(Number(channelIdId[0]?.id), savedQuestion);
+    } catch (e) {
+      console.log(e);
+    }
   } else {
     // exit program
   }

@@ -75,7 +75,6 @@ export const InputLocations = async (
     locs.push(writeStream.path);
   }
 
-  console.log(locs);
   let batchesToInput = [];
 
   for (let loc of locs) {
@@ -115,22 +114,9 @@ export const InputLocations = async (
     batchesToInput.push(batchToAdd);
   }
 
-  console.log(batchesToInput);
-
   await saveBatches(batchesToInput);
 
   return locs;
 };
 
 completion.then((result) => console.log(result.choices[0].message));
-
-await InputLocations(46, [
-  {
-    id: 1,
-    created_at: new Date(),
-    updated_at: new Date(),
-    deleted_at: new Date(),
-    question:
-      "Is the message below within the context of the Israel-Palestine conflict? Please answer using yes or no",
-  },
-]);

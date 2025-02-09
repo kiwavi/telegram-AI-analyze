@@ -2,7 +2,7 @@
 import { Dialog } from "telegram/tl/custom/dialog";
 import { db } from "../../index";
 import { channels } from "../schema";
-import { sql } from "drizzle-orm";
+import { sql, eq } from "drizzle-orm";
 
 export const allChannels = async () => {
   let res;
@@ -53,6 +53,15 @@ export const compareChannels = async (tel_channels: object[]) => {
   } else {
     throw new Error("No rows to compare");
   }
+};
+
+export const fetchChannel = async (channelId: bigint) => {
+  let res;
+  res = await db
+    .select()
+    .from(channels)
+    .where(eq(channels.telegram_channel_id, channelId));
+  return res;
 };
 
 // await saveChannels([
