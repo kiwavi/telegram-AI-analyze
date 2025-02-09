@@ -30,6 +30,10 @@ export const channelsRelations = relations(channels, ({ many }) => ({
   messages: many(messages),
 }));
 
+export const channelRelationToBatches = relations(channels, ({ many }) => ({
+  batches: many(batches),
+}));
+
 export const messages = pgTable(
   "messages",
   {
@@ -53,7 +57,7 @@ export const messages = pgTable(
     unique("channel_messages_unique")
       .on(t.channel_id, t.telegram_message_id)
       .nullsNotDistinct(),
-  ],
+  ]
 );
 
 export const messagesRelations = relations(messages, ({ one }) => ({
@@ -80,6 +84,10 @@ export const questions = pgTable("questions", {
 
 export const questionsRelationsToAnswers = relations(questions, ({ many }) => ({
   answers: many(answers),
+}));
+
+export const questionsRelationsToBatches = relations(questions, ({ many }) => ({
+  batches: many(batches),
 }));
 
 export const answers = pgTable("answers", {
@@ -110,5 +118,40 @@ export const answersRelationsToQuestions = relations(answers, ({ one }) => ({
   question: one(questions, {
     fields: [answers.question_id],
     references: [questions.id],
+  }),
+}));
+
+export const batches = pgTable("batches", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  channel_id: bigint("channel_id", {
+    mode: "bigint",
+  })
+    .notNull()
+    .references(() => channels.id),
+  question_id: integer()
+    .notNull()
+    .references(() => questions.id),
+  batchid: text().notNull().unique(),
+  status: text().notNull(),
+  fileid: text().notNull().unique(),
+  created_at: timestamp("created_at").notNull().defaultNow(),
+  updated_at: timestamp("updated_at")
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`)
+    .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
+  deleted_at: timestamp("deleted_at"),
+});
+
+export const batchRelationsToQuestions = relations(batches, ({ one }) => ({
+  question: one(questions, {
+    fields: [batches.question_id],
+    references: [questions.id],
+  }),
+}));
+
+export const batchRelationsToChannels = relations(batches, ({ one }) => ({
+  channel: one(channels, {
+    fields: [batches.channel_id],
+    references: [channels.id],
   }),
 }));
