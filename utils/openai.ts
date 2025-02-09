@@ -4,6 +4,7 @@ import { fetchChannelMessages } from "../src/db/models/messages";
 import _ from "lodash";
 import fs from "fs";
 import { uuidv7 } from "uuidv7";
+import { saveBatches } from "../src/db/models/batches";
 
 dotenv.config();
 
@@ -28,7 +29,14 @@ const completion = openai.chat.completions.create({
   ],
 });
 
-export const createBatchFile = async (
+export const createBatchFile = async (channel: number) => {
+  // with channel we can get all messages linked to it, with question we can get the question id
+  let messages = await fetchChannelMessages(channel);
+  let chunks = _.chunk(messages, 30000);
+  return chunks;
+};
+
+export const InputLocations = async (
   channel: number,
   question: {
     id: number;
@@ -38,9 +46,8 @@ export const createBatchFile = async (
     question: string;
   }[]
 ) => {
-  // with channel we can get all messages linked to it, with question we can get the question id
-  let messages = await fetchChannelMessages(channel);
-  let chunks = _.chunk(messages, 30000);
+  let chunks = await createBatchFile(channel);
+  let locs = [];
   for (let chunk of chunks) {
     // create a jsonl file
     var writeStream = fs.createWriteStream(
@@ -65,18 +72,52 @@ export const createBatchFile = async (
       writeStream.write(`${JSON.stringify(entry)}\n`);
     }
     writeStream.end();
+    locs.push(writeStream.path);
   }
+
+  console.log(locs);
+  let batchesToInput = [];
+
+  for (let loc of locs) {
+    // upload the input file
+    const file = await openai.files.create({
+      file: fs.createReadStream(locs[0]),
+      purpose: "batch",
+    });
+
+    const batch = await openai.batches.create({
+      input_file_id: file.id,
+      endpoint: "/v1/chat/completions",
+      completion_window: "24h",
+    });
+
+    let batchToAdd = {
+      fileid: file.id,
+      batchid: batch.id,
+      status: batch.status,
+      question_id: question[0].id,
+      channel_id: channel,
+    };
+
+    batchesToInput.push(batchToAdd);
+  }
+
+  console.log(batchesToInput);
+
+  await saveBatches(batchesToInput);
+
+  return locs;
 };
 
 completion.then((result) => console.log(result.choices[0].message));
 
-createBatchFile(45, [
+await InputLocations(45, [
   {
     id: 1,
     created_at: new Date(),
     updated_at: new Date(),
     deleted_at: new Date(),
     question:
-      "Is the message beolow within the context of the Israel-Palestine conflict? Please answer using yes or no",
+      "Is the message below within the context of the Israel-Palestine conflict? Please answer using yes or no",
   },
 ]);
