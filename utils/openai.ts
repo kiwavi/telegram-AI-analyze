@@ -66,7 +66,7 @@ export const InputLocations = async (
               content: `${question[0].question}: ${chn.message}`,
             },
           ],
-          max_tokens: 1000,
+          max_tokens: 30,
         },
       };
       writeStream.write(`${JSON.stringify(entry)}\n`);
@@ -79,6 +79,19 @@ export const InputLocations = async (
   let batchesToInput = [];
 
   for (let loc of locs) {
+    async function waitForFileExists(loc, currentTime = 0, timeout = 5000) {
+      if (fs.existsSync(loc)) return true;
+      if (currentTime === timeout) return false;
+      // wait for 1 second
+      await new Promise((resolve, reject) =>
+        setTimeout(() => resolve(true), 1000)
+      );
+      // waited for 1 second
+      return waitForFileExists(loc, currentTime + 1000, timeout);
+    }
+
+    await waitForFileExists(loc);
+
     // upload the input file
     const file = await openai.files.create({
       file: fs.createReadStream(locs[0]),
@@ -111,7 +124,7 @@ export const InputLocations = async (
 
 completion.then((result) => console.log(result.choices[0].message));
 
-await InputLocations(45, [
+await InputLocations(46, [
   {
     id: 1,
     created_at: new Date(),
