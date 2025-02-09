@@ -1,20 +1,24 @@
 // all crud operations to deal with channels
+import { Dialog } from "telegram/tl/custom/dialog";
 import { db } from "../../index";
 import { channels } from "../schema";
 import { sql } from "drizzle-orm";
 
 export const allChannels = async () => {
-  return await db.select().from(channels);
+  let res;
+  res = await db.select().from(channels);
+  return res;
 };
 
-export const saveChannels = async (tel_channels: string[]) => {
+export const saveChannels = async (tel_channels: Dialog[]) => {
   // take in a list of channels and iterate through them while saving them
   let arr = [];
   let res;
   for (let channel of tel_channels) {
-    let obj = {};
-    obj.telegram_channel_id = channel?.id?.value || channel.telegram_channel_id;
-    obj.channel_name = channel?.title || channel.channel_name;
+    let obj: { telegram_channel_id: bigint; channel_name: string } = {
+      telegram_channel_id: channel?.id?.value || channel.telegram_channel_id,
+      channel_name: channel?.title || channel.channel_name,
+    };
     arr.push(obj);
   }
   if (arr.length) {
@@ -28,9 +32,7 @@ export const saveChannels = async (tel_channels: string[]) => {
   }
 };
 
-export const compareChannels = async (
-  tel_channels: string[],
-): Promise<string[]> => {
+export const compareChannels = async (tel_channels: object[]) => {
   if (tel_channels?.length) {
     let query =
       await db.execute(sql`WITH temp_table(telegram_channel_id, channel_name) AS

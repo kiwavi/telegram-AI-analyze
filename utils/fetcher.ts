@@ -17,13 +17,14 @@ import {
   saveQuestion,
 } from "../src/db/models/questions";
 import promptSync from "prompt-sync";
+import { Dialog } from "telegram/tl/custom/dialog";
 
 const prompt = promptSync();
 
 dotenv.config();
 
 let apiId = process.env.API_ID;
-const apiHash: string = process.env.API_HASH;
+const apiHash = process.env.API_HASH as string;
 
 // Use the Methods Methods
 const rl = readline.createInterface({
@@ -35,21 +36,21 @@ const client = new TelegramClient(
   new StringSession(""),
   Number(apiId),
   apiHash,
-  {},
+  {}
 );
 
 await client.start({
   phoneNumber: async () =>
     new Promise((resolve) =>
-      rl.question("Please enter your number: ", resolve),
+      rl.question("Please enter your number: ", resolve)
     ),
   password: async () =>
     new Promise((resolve) =>
-      rl.question("Please enter your password: ", resolve),
+      rl.question("Please enter your password: ", resolve)
     ),
   phoneCode: async () =>
     new Promise((resolve) =>
-      rl.question("Please enter the code you received: ", resolve),
+      rl.question("Please enter the code you received: ", resolve)
     ),
   onError: (err) => console.log(err),
 });
@@ -57,13 +58,14 @@ console.log("You should now be connected.");
 
 let dialogs = await client.getDialogs({});
 
-const getChannels = async (): Promise<string[]> => {
+const getChannels = async (): Promise<Dialog[]> => {
   let channels = dialogs.filter((nm) => nm.isChannel);
   return channels;
 };
 
 let channels = await getChannels();
-let channelsArr: { name: string; value: bigint; description: string }[] = [];
+let channelsArr: { name: string; value: bigint | null; description: string }[] =
+  [];
 let all_channels = await allChannels();
 
 // this should only handle saving channels in db and returning them. Return channelsArr
@@ -73,29 +75,33 @@ if (!all_channels?.length) {
   console.log(channels);
   if (channels?.length) {
     console.log("Saving channels");
-    let res = await saveChannels(channels);
-    let refetchChannels = await allChannels();
-    for (let chn of refetchChannels) {
+    await saveChannels(channels);
+    all_channels = await allChannels();
+    for (let chn of all_channels) {
       console.log(chn);
-      let obj: { name: string; value: bigint; description: string } = {};
-      obj.name = chn.channel_name;
-      obj.value = chn.telegram_channel_id;
-      obj.description = chn.channel_name;
+      let obj: { name: string; value: bigint | null; description: string } = {
+        name: chn.channel_name,
+        value: chn.telegram_channel_id,
+        description: chn.channel_name,
+      };
+
       channelsArr.push(obj);
     }
   } else {
     console.log(
-      "You are not subscribed to any channels. Please subscribe first",
+      "You are not subscribed to any channels. Please subscribe first"
     );
     throw new Error("You are not subscribed to any channels.");
   }
 } else {
   // they have channels in db. confirm whether some are not in db and inform user
-  let arr = [];
+  let arr: object[] = [];
   for (let channel of channels) {
-    let obj: { telegram_channel_id: bigint; channel_name: string } = {};
-    obj.telegram_channel_id = Number(channel.id.value);
-    obj.channel_name = channel.title;
+    let obj: { telegram_channel_id: number; channel_name: string | undefined } =
+      {
+        telegram_channel_id: Number(channel.id.value),
+        channel_name: channel.title,
+      };
     arr.push(obj);
   }
 
@@ -103,7 +109,7 @@ if (!all_channels?.length) {
   console.log(compared);
   if (compared?.rows?.length) {
     console.log(
-      "Some of the subscribed channels have not been saved to the database. Do you want to add them?",
+      "Some of the subscribed channels have not been saved to the database. Do you want to add them?"
     );
     const answer = await select({
       message: "Do you want to save these channels",
@@ -128,21 +134,24 @@ if (!all_channels?.length) {
       await saveChannels(channelsToSave);
     }
 
-    let refetchChannels = await allChannels();
+    all_channels = await allChannels();
 
-    for (let chn of refetchChannels) {
-      let obj: { name: string; value: number; description: string } = {};
-      obj.name = chn.channel_name;
-      obj.value = chn.telegram_channel_id;
-      obj.description = chn.channel_name;
+    for (let chn of all_channels) {
+      let obj: { name: string; value: bigint | null; description: string } = {
+        name: chn.channel_name,
+        value: chn.telegram_channel_id,
+        description: chn.channel_name,
+      };
+
       channelsArr.push(obj);
     }
   } else {
     for (let chn of all_channels) {
-      let obj: { name: string; value: number; description: string } = {};
-      obj.name = chn.channel_name;
-      obj.value = chn.telegram_channel_id;
-      obj.description = chn.channel_name;
+      let obj: { name: string; value: bigint | null; description: string } = {
+        name: chn.channel_name,
+        value: chn.telegram_channel_id,
+        description: chn.channel_name,
+      };
       channelsArr.push(obj);
     }
   }
@@ -167,7 +176,7 @@ const answer = await select({
 });
 
 if (Object.is(answer, 1)) {
-  const channelsToQuery: bigint = await select({
+  const channelsToQuery: bigint | null = await select({
     message: "Which channel do you want to fetch data from?",
     choices: channelsArr,
     default: channelsArr[0].name,
@@ -182,18 +191,18 @@ if (Object.is(answer, 1)) {
   console.log(channelsToQuery);
 
   let extractDialogEntity = dialogs.find(
-    (nm) => Number(nm.id) == Number(channelsToQuery),
+    (nm) => Number(nm.id) == Number(channelsToQuery)
   )?.entity;
 
   let messages = await fetchChannelMessages(client, extractDialogEntity);
 
   // console.log(JSON.stringify(messages));
 
-  let channelsRefetch = await allChannels();
+  all_channels = await allChannels();
 
-  let channelId: number = channelsRefetch.find(
-    (nm) => Number(nm.telegram_channel_id) == Number(channelsToQuery),
-  )?.id;
+  let channelId: number = all_channels.find(
+    (nm) => Number(nm.telegram_channel_id) == Number(channelsToQuery)
+  )?.id as number;
 
   console.log(messages.length);
 
@@ -207,11 +216,23 @@ if (Object.is(answer, 1)) {
   console.log("Messages saved successfully");
 }
 
-let savedQuestion: string[];
+let savedQuestion: {
+  id: number;
+  created_at: Date;
+  updated_at: Date;
+  deleted_at: Date | null;
+  question: string;
+}[];
 
 if (Object.is(answer, 2)) {
   // fetch existing questions and display them. If none then tell them to add a question. generally returns a question
-  let questions: string[] = await fetchAllQuestions();
+  let questions: {
+    id: number;
+    created_at: Date;
+    updated_at: Date;
+    deleted_at: Date | null;
+    question: string;
+  }[] = await fetchAllQuestions();
   if (!questions?.length) {
     // have them add a question
     console.log("You do not have any questions yet");
@@ -243,7 +264,11 @@ if (Object.is(answer, 2)) {
       savedQuestion = await saveQuestion(question);
       console.log(savedQuestion);
     } else {
-      let choices = [];
+      let choices: {
+        name: string;
+        value: number;
+        description: string;
+      }[] = [];
       for (let q of questions) {
         choices.push({
           name: q.question,
@@ -260,5 +285,47 @@ if (Object.is(answer, 2)) {
       savedQuestion = await fetchQuestion(answer);
       console.log(savedQuestion);
     }
+  }
+
+  // now we apply the question to a channel
+  let channelsToQuery: bigint | null = await select({
+    message: "Which channel do you want to query AI about ?",
+    choices: channelsArr,
+    default: channelsArr[0].name,
+  });
+
+  let channelName = channelsArr.find(
+    (ch) => (ch.value = channelsToQuery)
+  )?.name;
+
+  if (channelsToQuery) {
+    console.log(savedQuestion);
+    console.log(
+      `You are about to ask ${savedQuestion[0].question} of all messages in ${channelName}`
+    );
+  }
+
+  const askAIAnswer = await select({
+    message: "Proceed?",
+    choices: [
+      {
+        name: "Yes",
+        value: 1,
+        description: "Yes",
+      },
+      {
+        name: "No",
+        value: 2,
+        description: "No",
+      },
+    ],
+    default: "Ask existing question",
+  });
+
+  if (Object.is(askAIAnswer, 1)) {
+    console.log("Fetching data from AI");
+    // call the function that sends the query to AI
+  } else {
+    // exit program
   }
 }

@@ -14,17 +14,20 @@
   "license": "ISC",
   "dependencies": {
     "@inquirer/prompts": "^7.2.4",
+    "@types/prompt-sync": "^4.2.3",
     "cli-select": "^1.1.2",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.38.4",
     "express": "^4.21.2",
     "openai": "^4.80.1",
     "pg": "^8.13.1",
+    "prompt-sync": "^4.2.0",
     "telegram": "^2.26.16"
   },
   "type": "module",
   "devDependencies": {
     "@types/express": "^5.0.0",
+    "@types/lodash": "^4.17.15",
     "@types/node": "^22.10.7",
     "@types/pg": "^8.11.11",
     "concurrently": "^9.1.2",
