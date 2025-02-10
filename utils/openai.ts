@@ -106,6 +106,6 @@ export const InputLocations = async (
 
 export const getBatchStatus = async (batch_id: string) => {
   const batch = await openai.batches.retrieve(batch_id);
-  console.log(batch);
+  // console.log(batch);
   return batch;
 };

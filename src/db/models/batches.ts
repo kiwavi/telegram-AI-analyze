@@ -35,7 +35,7 @@ export const updateBatchStatus = async (batchid: string, status: string) => {
 export const updateOutputFileId = async (batchid: string, fileid: string) => {
   let res = await db
     .update(batches)
-    .set({ outputfileid })
-    .where(eq(batches.batchid, fileid));
+    .set({ outputfileid: fileid })
+    .where(eq(batches.batchid, batchid));
   return res;
 };
