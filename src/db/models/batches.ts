@@ -21,7 +21,9 @@ export const getValidatingBatches = async () => {
   let batch = await db
     .select()
     .from(batches)
-    .where(inArray(batches.status, ["validating", "in_progress"]));
+    .where(
+      inArray(batches.status, ["validating", "in_progress", "finalizing"])
+    );
   return batch;
 };
 
