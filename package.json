@@ -22,7 +22,8 @@
     "openai": "^4.80.1",
     "pg": "^8.13.1",
     "prompt-sync": "^4.2.0",
-    "telegram": "^2.26.16"
+    "telegram": "^2.26.16",
+    "uuidv7": "^1.0.2"
   },
   "type": "module",
   "devDependencies": {
