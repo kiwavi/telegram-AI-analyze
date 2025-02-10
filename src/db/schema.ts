@@ -134,8 +134,9 @@ export const batches = pgTable("batches", {
   batchid: text().notNull().unique(),
   status: text().notNull(),
   fileid: text().notNull().unique(),
+  outputfileid: text().unique(),
   created_at: timestamp("created_at").notNull().defaultNow(),
-  updated_at: timestamp("updated_at")
+  updated_at: timestamp("updated_at", { withTimezone: true, mode: "string" })
     .notNull()
     .default(sql`CURRENT_TIMESTAMP`)
     .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
