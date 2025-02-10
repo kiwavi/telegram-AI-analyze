@@ -90,22 +90,30 @@ export const questionsRelationsToBatches = relations(questions, ({ many }) => ({
   batches: many(batches),
 }));
 
-export const answers = pgTable("answers", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  question_id: integer()
-    .notNull()
-    .references(() => questions.id),
-  message_id: integer()
-    .notNull()
-    .references(() => messages.id),
-  answer: text().notNull(),
-  created_at: timestamp("created_at").notNull().defaultNow(),
-  updated_at: timestamp("updated_at")
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`)
-    .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
-  deleted_at: timestamp("deleted_at"),
-});
+export const answers = pgTable(
+  "answers",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    question_id: integer()
+      .notNull()
+      .references(() => questions.id),
+    message_id: integer()
+      .notNull()
+      .references(() => messages.id),
+    answer: text().notNull(),
+    created_at: timestamp("created_at").notNull().defaultNow(),
+    updated_at: timestamp("updated_at")
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP`)
+      .$onUpdate(() => sql`CURRENT_TIMESTAMP`),
+    deleted_at: timestamp("deleted_at"),
+  },
+  (t) => [
+    unique("answers_unique_index")
+      .on(t.question_id, t.message_id)
+      .nullsNotDistinct(),
+  ]
+);
 
 export const answersRelationsToMessages = relations(answers, ({ one }) => ({
   message: one(messages, {

@@ -1,6 +1,7 @@
 import { db } from "../../index";
 import { sql, eq } from "drizzle-orm";
 import { batches } from "../../db/schema";
+import { inArray } from "drizzle-orm";
 
 export const saveBatches = async (batches: object[]) => {
   let res = await db.execute(
@@ -20,7 +21,7 @@ export const getValidatingBatches = async () => {
   let batch = await db
     .select()
     .from(batches)
-    .where(eq(batches.status, "validating"));
+    .where(inArray(batches.status, ["validating", "in_progress"]));
   return batch;
 };
 

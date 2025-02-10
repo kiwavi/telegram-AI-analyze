@@ -58,30 +58,3 @@ export const saveAnswers = async (batch: {
 };
 
 await retrieveBatchResults();
-
-// export const saveContent = async (path: string) => {
-//   // create a readline interface for reading the file line by line
-//   const rl = readline.createInterface({
-//     input: fs.createReadStream(path),
-//     crlfDelay: Infinity,
-//   });
-
-//   // create an array to hold the parsed JSON objects
-//   let jsonArray = [];
-
-//   // read each line of the file and parse it as JSON
-//   rl.on("line", (line) => {
-//     jsonArray.push(JSON.parse(line));
-//   });
-
-//   // log the parsed JSON objects once the file has been fully read
-//   rl.on("close", () => {
-//     console.log(jsonArray);
-//   });
-// };
-
-// // await retrieveBatchResults();
-
-// await saveContent(
-//   "./file-C6Vn84WufN1qqhy17Z6fy5_0194ef5f-99a3-79c4-ad3b-757c43b5c53f.jsonl"
-// );
