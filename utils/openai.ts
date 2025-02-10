@@ -51,7 +51,7 @@ export const InputLocations = async (
               content: `${question[0].question}: ${chn.message}`,
             },
           ],
-          max_tokens: 30,
+          max_tokens: 10,
         },
       };
       writeStream.write(`${JSON.stringify(entry)}\n`);
@@ -102,4 +102,10 @@ export const InputLocations = async (
   await saveBatches(batchesToInput);
 
   return locs;
+};
+
+export const getBatchStatus = async (batch_id: string) => {
+  const batch = await openai.batches.retrieve(batch_id);
+  // console.log(batch);
+  return batch;
 };
