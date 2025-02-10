@@ -47,7 +47,7 @@ export const InputLocations = async (
   }[]
 ) => {
   let chunks = await createBatchFile(channel);
-  let locs = [];
+  let locs: string[] = [];
   for (let chunk of chunks) {
     // create a jsonl file
     var writeStream = fs.createWriteStream(
