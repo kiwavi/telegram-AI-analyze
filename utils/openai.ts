@@ -109,3 +109,30 @@ export const getBatchStatus = async (batch_id: string) => {
   // console.log(batch);
   return batch;
 };
+
+export const getBatchResults = async (outputfileid: string) => {
+  // returns the path to the file where the contents have been saved
+  const fileResponse = await openai.files.content(outputfileid);
+  const fileContents = await fileResponse.text();
+
+  console.log(fileContents);
+
+  var writeStream = fs.createWriteStream(`./${outputfileid}_${uuidv7()}.jsonl`);
+  writeStream.write(fileContents);
+  writeStream.end();
+
+  async function waitForFileExists(loc, currentTime = 0, timeout = 5000) {
+    if (fs.existsSync(loc)) return true;
+    if (currentTime === timeout) return false;
+    // wait for 1 second
+    await new Promise((resolve, reject) =>
+      setTimeout(() => resolve(true), 1000)
+    );
+    // waited for 1 second
+    return waitForFileExists(loc, currentTime + 1000, timeout);
+  }
+
+  await waitForFileExists(writeStream.path);
+
+  return writeStream.path;
+};

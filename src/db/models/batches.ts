@@ -39,3 +39,11 @@ export const updateOutputFileId = async (batchid: string, fileid: string) => {
     .where(eq(batches.batchid, batchid));
   return res;
 };
+
+export const getCompletedBatches = async () => {
+  let batch = await db
+    .select()
+    .from(batches)
+    .where(eq(batches.status, "completed"));
+  return batch;
+};
