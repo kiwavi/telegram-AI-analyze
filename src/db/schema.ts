@@ -6,6 +6,7 @@ import {
   timestamp,
   text,
   unique,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { relations, sql } from "drizzle-orm";
 import { uniqueIndex } from "drizzle-orm/sqlite-core";
@@ -143,6 +144,7 @@ export const batches = pgTable("batches", {
   status: text().notNull(),
   fileid: text().notNull().unique(),
   outputfileid: text().unique(),
+  saved: boolean().default(false).notNull(),
   created_at: timestamp("created_at").notNull().defaultNow(),
   updated_at: timestamp("updated_at", { withTimezone: true, mode: "string" })
     .notNull()

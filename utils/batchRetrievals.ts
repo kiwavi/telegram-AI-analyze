@@ -1,4 +1,7 @@
-import { getCompletedBatches } from "../src/db/models/batches";
+import {
+  getCompletedBatches,
+  updateBatchAsSaved,
+} from "../src/db/models/batches";
 import { getBatchResults, getBatchStatus } from "./openai";
 import fs from "fs";
 import { readFileSync } from "fs";
@@ -54,6 +57,7 @@ export const saveAnswers = async (batch: {
   rl.on("close", () => {
     console.log(jsonArray);
     saveAnswersBatch(jsonArray);
+    updateBatchAsSaved(batch.batchid);
   });
 };
 

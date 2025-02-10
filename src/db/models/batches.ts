@@ -47,6 +47,14 @@ export const getCompletedBatches = async () => {
   let batch = await db
     .select()
     .from(batches)
-    .where(eq(batches.status, "completed"));
+    .where(sql`${batches.status} = 'completed' and ${batches.saved}=false`);
   return batch;
+};
+
+export const updateBatchAsSaved = async (batchid: string) => {
+  let res = await db
+    .update(batches)
+    .set({ saved: true })
+    .where(eq(batches.batchid, batchid));
+  return res;
 };
