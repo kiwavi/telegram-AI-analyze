@@ -14,21 +14,6 @@ const openai = new OpenAI({
   apiKey: apiSecret,
 });
 
-const completion = openai.chat.completions.create({
-  model: "gpt-4o-mini",
-  store: true,
-  messages: [
-    {
-      role: "user",
-      content: `Does the sentence 'An Israeli drone drops a bomb on a building in northern Gaza, flies off, and detonates it near Palestinian civilians, footage shared by local media shows' revolve around the Israel-Palestine conflict? Answer with yes or no or maybe.`,
-    },
-    {
-      role: "user",
-      content: `Does the sentence 'An Israeli drone drops a bomb on a building in northern Gaza, flies off, and detonates it near Palestinian civilians, footage shared by local media shows' revolve around the Israel-Palestine conflict? Answer with yes or no or maybe.`,
-    },
-  ],
-});
-
 export const createBatchFile = async (channel: number) => {
   // with channel we can get all messages linked to it, with question we can get the question id
   let messages = await fetchChannelMessages(channel);
@@ -118,5 +103,3 @@ export const InputLocations = async (
 
   return locs;
 };
-
-completion.then((result) => console.log(result.choices[0].message));
