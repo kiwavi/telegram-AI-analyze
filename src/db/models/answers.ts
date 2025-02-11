@@ -1,5 +1,4 @@
 import { db } from "../../index";
-import { sql, eq } from "drizzle-orm";
 import { answers } from "../schema";
 
 export const saveAnswersBatch = async (

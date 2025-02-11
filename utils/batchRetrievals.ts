@@ -4,7 +4,6 @@ import {
 } from "../src/db/models/batches";
 import { getBatchResults, getBatchStatus } from "./openai";
 import fs from "fs";
-import { readFileSync } from "fs";
 import readline from "readline";
 import { saveAnswersBatch } from "../src/db/models/answers";
 
