@@ -38,17 +38,19 @@ export const saveAnswers = async (batch: {
   });
 
   // create an array to hold the parsed JSON objects
-  let jsonArray = [];
+  let jsonArray: { question_id: number; answer: string; message_id: number }[] =
+    [];
 
   // read each line of the file and parse it as JSON
   rl.on("line", (line) => {
     // jsonArray.push(JSON.parse(line));
     let datainst = JSON.parse(line);
     if (datainst.error == null) {
-      let obj = {};
-      obj.question_id = batch.question_id;
-      obj.answer = datainst.response.body.choices[0].message.content;
-      obj.message_id = Number(datainst.custom_id);
+      let obj: { question_id: number; answer: string; message_id: number } = {
+        question_id: batch.question_id,
+        answer: datainst.response.body.choices[0].message.content,
+        message_id: Number(datainst.custom_id),
+      };
       jsonArray.push(obj);
     }
   });

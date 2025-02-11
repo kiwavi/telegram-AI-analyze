@@ -57,13 +57,17 @@ export const InputLocations = async (
       writeStream.write(`${JSON.stringify(entry)}\n`);
     }
     writeStream.end();
-    locs.push(writeStream.path);
+    locs.push(writeStream.path as string);
   }
 
   let batchesToInput = [];
 
   for (let loc of locs) {
-    async function waitForFileExists(loc, currentTime = 0, timeout = 5000) {
+    async function waitForFileExists(
+      loc: string,
+      currentTime = 0,
+      timeout = 5000
+    ) {
       if (fs.existsSync(loc)) return true;
       if (currentTime === timeout) return false;
       // wait for 1 second
@@ -121,7 +125,11 @@ export const getBatchResults = async (outputfileid: string) => {
   writeStream.write(fileContents);
   writeStream.end();
 
-  async function waitForFileExists(loc, currentTime = 0, timeout = 5000) {
+  async function waitForFileExists(
+    loc: string,
+    currentTime = 0,
+    timeout = 5000
+  ) {
     if (fs.existsSync(loc)) return true;
     if (currentTime === timeout) return false;
     // wait for 1 second
@@ -132,7 +140,7 @@ export const getBatchResults = async (outputfileid: string) => {
     return waitForFileExists(loc, currentTime + 1000, timeout);
   }
 
-  await waitForFileExists(writeStream.path);
+  await waitForFileExists(writeStream.path as string);
 
   return writeStream.path;
 };
