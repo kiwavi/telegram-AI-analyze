@@ -327,7 +327,7 @@ if (Object.is(answer, 2)) {
   });
 
   if (Object.is(askAIAnswer, 1)) {
-    console.log("Fetching data from AI");
+    console.log("Creating and sending batches to chatgpt Batch API");
     // call the function that sends the query to AI
     try {
       await InputLocations(Number(channelIdId[0]?.id), savedQuestion);

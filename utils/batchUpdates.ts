@@ -9,7 +9,7 @@ export const fetchAndUpdateValidatingBatches = async () => {
   let batches = await getValidatingBatches();
   for (let batch of batches) {
     let b = await getBatchStatus(batch.batchid);
-    console.log(b);
+    console.log(JSON.stringify(b));
     if (b.status !== batch.status) {
       await updateBatchStatus(batch.batchid, b.status);
       if (b.output_file_id) {
