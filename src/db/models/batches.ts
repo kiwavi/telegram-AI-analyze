@@ -1,6 +1,7 @@
 import { db } from "../../index";
 import { sql, eq } from "drizzle-orm";
 import { batches } from "../../db/schema";
+import { inArray } from "drizzle-orm";
 
 export const saveBatches = async (batches: object[]) => {
   let res = await db.execute(
@@ -20,7 +21,9 @@ export const getValidatingBatches = async () => {
   let batch = await db
     .select()
     .from(batches)
-    .where(eq(batches.status, "validating"));
+    .where(
+      inArray(batches.status, ["validating", "in_progress", "finalizing"])
+    );
   return batch;
 };
 
@@ -36,6 +39,22 @@ export const updateOutputFileId = async (batchid: string, fileid: string) => {
   let res = await db
     .update(batches)
     .set({ outputfileid: fileid })
+    .where(eq(batches.batchid, batchid));
+  return res;
+};
+
+export const getCompletedBatches = async () => {
+  let batch = await db
+    .select()
+    .from(batches)
+    .where(sql`${batches.status} = 'completed' and ${batches.saved}=false`);
+  return batch;
+};
+
+export const updateBatchAsSaved = async (batchid: string) => {
+  let res = await db
+    .update(batches)
+    .set({ saved: true })
     .where(eq(batches.batchid, batchid));
   return res;
 };

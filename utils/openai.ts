@@ -51,19 +51,23 @@ export const InputLocations = async (
               content: `${question[0].question}: ${chn.message}`,
             },
           ],
-          max_tokens: 10,
+          max_tokens: 6,
         },
       };
       writeStream.write(`${JSON.stringify(entry)}\n`);
     }
     writeStream.end();
-    locs.push(writeStream.path);
+    locs.push(writeStream.path as string);
   }
 
   let batchesToInput = [];
 
   for (let loc of locs) {
-    async function waitForFileExists(loc, currentTime = 0, timeout = 5000) {
+    async function waitForFileExists(
+      loc: string,
+      currentTime = 0,
+      timeout = 5000
+    ) {
       if (fs.existsSync(loc)) return true;
       if (currentTime === timeout) return false;
       // wait for 1 second
@@ -108,4 +112,35 @@ export const getBatchStatus = async (batch_id: string) => {
   const batch = await openai.batches.retrieve(batch_id);
   // console.log(batch);
   return batch;
+};
+
+export const getBatchResults = async (outputfileid: string) => {
+  // returns the path to the file where the contents have been saved
+  const fileResponse = await openai.files.content(outputfileid);
+  const fileContents = await fileResponse.text();
+
+  console.log(fileContents);
+
+  var writeStream = fs.createWriteStream(`./${outputfileid}_${uuidv7()}.jsonl`);
+  writeStream.write(fileContents);
+  writeStream.end();
+
+  async function waitForFileExists(
+    loc: string,
+    currentTime = 0,
+    timeout = 5000
+  ) {
+    if (fs.existsSync(loc)) return true;
+    if (currentTime === timeout) return false;
+    // wait for 1 second
+    await new Promise((resolve, reject) =>
+      setTimeout(() => resolve(true), 1000)
+    );
+    // waited for 1 second
+    return waitForFileExists(loc, currentTime + 1000, timeout);
+  }
+
+  await waitForFileExists(writeStream.path as string);
+
+  return writeStream.path;
 };

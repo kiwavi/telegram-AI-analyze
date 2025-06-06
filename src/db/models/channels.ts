@@ -63,28 +63,3 @@ export const fetchChannel = async (channelId: bigint) => {
     .where(eq(channels.telegram_channel_id, channelId));
   return res;
 };
-
-// await saveChannels([
-//   {
-//     telegram_channel_id: -1002098116995,
-//     channel_name: "🇰🇪 The Kenya We Want 🇰🇪",
-//   },
-//   {
-//     telegram_channel_id: -1001090406917,
-//     channel_name: "Nairobi GNU/Linux User Group",
-//   },
-//   { telegram_channel_id: -1001387645188, channel_name: "RT News" },
-//   { telegram_channel_id: -1001321385690, channel_name: "Al Jazeera English" },
-//   { telegram_channel_id: -1001222973093, channel_name: "National Geographic" },
-//   { telegram_channel_id: -1002111495264, channel_name: "ZYNERIS.COM" },
-//   { telegram_channel_id: -1001942691032, channel_name: "African Stream" },
-//   {
-//     telegram_channel_id: -1001197600239,
-//     channel_name: "React Developer Community Kenya",
-//   },
-//   {
-//     telegram_channel_id: -1001836620031,
-//     channel_name: "UNIswap-MEV節點礦池官方中文群",
-//   },
-//   { telegram_channel_id: -1001411818369, channel_name: "Dr Mumbi Show" },
-// ]);

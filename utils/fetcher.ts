@@ -99,11 +99,13 @@ if (!all_channels?.length) {
   // they have channels in db. confirm whether some are not in db and inform user
   let arr: object[] = [];
   for (let channel of channels) {
-    let obj: { telegram_channel_id: number; channel_name: string | undefined } =
-      {
-        telegram_channel_id: Number(channel.id.value),
-        channel_name: channel.title,
-      };
+    let obj: {
+      telegram_channel_id: number | undefined;
+      channel_name: string | undefined;
+    } = {
+      telegram_channel_id: channel?.id?.toJSNumber(),
+      channel_name: channel.title,
+    };
     arr.push(obj);
   }
 
@@ -327,7 +329,7 @@ if (Object.is(answer, 2)) {
   });
 
   if (Object.is(askAIAnswer, 1)) {
-    console.log("Fetching data from AI");
+    console.log("Creating and sending batches to chatgpt Batch API");
     // call the function that sends the query to AI
     try {
       await InputLocations(Number(channelIdId[0]?.id), savedQuestion);
