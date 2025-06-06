@@ -110,7 +110,7 @@ if (!all_channels?.length) {
   }
 
   let compared = await compareChannels(arr);
-  console.log(compared);
+
   if (compared?.rows?.length) {
     console.log(
       "Some of the subscribed channels have not been saved to the database. Do you want to add them?"
@@ -240,8 +240,6 @@ if (Object.is(answer, 2)) {
     const question = prompt("What is your question?");
 
     savedQuestion = await saveQuestion(question);
-
-    console.log(savedQuestion);
   } else {
     const answer = await select({
       message: "Which action do you want to do?",
@@ -263,7 +261,6 @@ if (Object.is(answer, 2)) {
     if (Object.is(answer, 1)) {
       const question = prompt("What is your question?");
       savedQuestion = await saveQuestion(question);
-      console.log(savedQuestion);
     } else {
       let choices: {
         name: string;
