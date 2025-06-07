@@ -67,9 +67,7 @@ async function getClientChannels(client: TelegramClient): Promise<Dialog[]> {
   // returns current channels
   let dialogs = await client.getDialogs({});
   let channels: Dialog[] = [];
-  const getChannels = async () => {
-    channels = dialogs.filter((nm) => nm.isChannel);
-  };
+  channels = dialogs.filter((nm) => nm.isChannel);
   return channels;
 }
 
@@ -369,3 +367,10 @@ async function actOnChoice(
     }
   }
 }
+
+(async () => {
+  const client = await startInteraction(rl);
+  let channels = await compareCurrentAndSavedChannels(client);
+  let ans = await fetchAction();
+  await actOnChoice(ans, channels, client);
+})();
