@@ -326,7 +326,7 @@ async function actOnChoice(
       (element) => element.value == channelsToQuery
     )?.name;
 
-    const channelId = channelsArr.find(
+    const channelId: bigint | null | undefined = channelsArr.find(
       (element) => element.value == channelsToQuery
     )?.value;
 

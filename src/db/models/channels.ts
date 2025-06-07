@@ -56,7 +56,7 @@ export const compareChannels = async (tel_channels: object[]) => {
   }
 };
 
-export const fetchChannel = async (channelId: bigint) => {
+export const fetchChannel = async (channelId: bigint | null | undefined) => {
   let res;
   res = await db
     .select()
