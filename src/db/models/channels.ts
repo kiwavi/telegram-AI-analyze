@@ -16,8 +16,9 @@ export const saveChannels = async (tel_channels: Dialog[]) => {
   let res;
   for (let channel of tel_channels) {
     let obj: { telegram_channel_id: bigint; channel_name: string } = {
-      telegram_channel_id: channel?.id?.value || channel.telegram_channel_id,
-      channel_name: channel?.title || channel.channel_name,
+      telegram_channel_id:
+        channel?.id?.toJSNumber() || channel?.telegram_channel_id,
+      channel_name: channel?.title || channel?.channel_name,
     };
     arr.push(obj);
   }
@@ -55,7 +56,7 @@ export const compareChannels = async (tel_channels: object[]) => {
   }
 };
 
-export const fetchChannel = async (channelId: bigint) => {
+export const fetchChannel = async (channelId: bigint | null | undefined) => {
   let res;
   res = await db
     .select()
