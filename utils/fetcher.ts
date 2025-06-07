@@ -203,7 +203,11 @@ async function fetchAction(): Promise<number> {
 
 async function actOnChoice(
   answer: number,
-  channelsArr,
+  channelsArr: {
+    name: string;
+    value: bigint | null;
+    description: string;
+  }[] = [],
   client: TelegramClient
 ) {
   if (Object.is(answer, 1)) {
