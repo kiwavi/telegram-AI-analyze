@@ -1,8 +1,5 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
-import { TelegramClient } from "telegram";
-import { StringSession } from "telegram/sessions";
-import readline from "readline";
 
 dotenv.config();
 const app: Express = express();
