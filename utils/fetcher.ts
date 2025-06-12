@@ -6,20 +6,20 @@ import {
   allChannels,
   compareChannels,
   saveChannels,
-} from "../src/db/models/channels";
+} from "../src/db/models/channels.js";
 import { select, Separator } from "@inquirer/prompts";
-import { fetchChannelMessages } from "./fetchMessages";
-import { saveMessages } from "../src/db/models/messages";
+import { fetchChannelMessages } from "./fetchMessages.js";
+import { saveMessages } from "../src/db/models/messages.js";
 import _ from "lodash";
 import {
   fetchAllQuestions,
   fetchQuestion,
   saveQuestion,
-} from "../src/db/models/questions";
+} from "../src/db/models/questions.js";
 import promptSync from "prompt-sync";
-import { Dialog } from "telegram/tl/custom/dialog";
-import { InputLocations } from "./openai";
-import { fetchChannel } from "../src/db/models/channels";
+import { Dialog } from "telegram/tl/custom/dialog.js";
+import { InputLocations } from "./openai.js";
+import { fetchChannel } from "../src/db/models/channels.js";
 
 const prompt = promptSync();
 
