@@ -1,7 +1,7 @@
 // all crud operations to deal with channels
-import { Dialog } from "telegram/tl/custom/dialog";
-import { db } from "../../index";
-import { channels } from "../schema";
+import { Dialog } from "telegram/tl/custom/dialog.js";
+import { db } from "../../../index.js";
+import { channels } from "../schema.js";
 import { sql, eq } from "drizzle-orm";
 
 export const allChannels = async () => {

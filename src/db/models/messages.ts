@@ -1,6 +1,6 @@
-import { db } from "../../index";
+import { db } from "../../../index.js";
 import { sql, eq } from "drizzle-orm";
-import { messages } from "../schema";
+import { messages } from "../schema.js";
 
 export const saveMessages = async (messages: string, channel_id: number) => {
   let res;
