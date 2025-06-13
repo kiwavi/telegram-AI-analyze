@@ -20,8 +20,11 @@ app.get("/", (req: Request, res: Response) => {
 
 app.get("/messages", async (req: Request, res: Response) => {
   try {
-    const { tags } = req.body;
-    const tagsJoined = tags.join(" OR ");
+    let tags: string | object[] = req.query.tags;
+
+    if (Array.isArray(tags)) {
+      tags = tags.join(" OR ");
+    }
 
     const results = await db
       .select({
@@ -31,7 +34,7 @@ app.get("/messages", async (req: Request, res: Response) => {
       })
       .from(messages)
       .innerJoin(channels, eq(messages.channel_id, channels.id))
-      .where(sql`message @@@ ${tagsJoined}`);
+      .where(sql`message @@@ ${tags}`);
 
     return res.status(200).json({ success: true, data: results });
   } catch (e) {
