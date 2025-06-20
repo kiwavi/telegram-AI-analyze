@@ -23,7 +23,7 @@ app.get("/", (req: Request, res: Response) => {
 
 // const tagsSchema = z.union([z.string(), z.array(z.string())]);
 const tagsSchema = z.object({
-  tags: z.array(z.string()),
+  tags: z.union([z.array(z.string()), z.string()]),
 });
 
 app.get(
