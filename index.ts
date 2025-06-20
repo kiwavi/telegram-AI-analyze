@@ -42,6 +42,7 @@ app.get(
           messageId: messages.id,
           messageText: messages.message,
           channelName: channels.channel_name,
+          created_at: messages.telegram_created_at,
         })
         .from(messages)
         .innerJoin(channels, eq(messages.channel_id, channels.id))
