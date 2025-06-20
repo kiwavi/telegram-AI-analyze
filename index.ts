@@ -7,27 +7,31 @@ import { sql, eq } from "drizzle-orm";
 dotenv.config();
 const app: Express = express();
 const port = process.env.PORT;
-import { z } from "zod/v4";
+import { z } from "zod";
 
 import { drizzle } from "drizzle-orm/node-postgres";
 
 export const db = drizzle(process.env.DATABASE_URL!);
 import bodyParser from "body-parser";
 import { validateSchema } from "./utils/zodMiddleWare.js";
+
 app.use(bodyParser.json());
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello there");
 });
 
-const tagsSchema = z.union([z.string(), z.array(z.string())]);
+// const tagsSchema = z.union([z.string(), z.array(z.string())]);
+const tagsSchema = z.object({
+  tags: z.array(z.string()),
+});
 
 app.get(
   "/messages",
   validateSchema(tagsSchema, "query"),
   async (req: Request, res: Response) => {
     try {
-      let tags: string | object[] = req.query.tags;
+      let tags = req.query.tags;
 
       if (Array.isArray(tags)) {
         tags = tags.join(" OR ");
