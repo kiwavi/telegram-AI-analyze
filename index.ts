@@ -50,7 +50,6 @@ app.get(
 
       return res.status(200).json({ success: true, data: results });
     } catch (e) {
-      console.log(e);
       return res.status(500).json({ success: false });
     }
   }
