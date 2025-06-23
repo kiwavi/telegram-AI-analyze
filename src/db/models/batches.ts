@@ -1,6 +1,6 @@
-import { db } from "../../index";
+import { db } from "../../../index.js";
 import { sql, eq } from "drizzle-orm";
-import { batches } from "../../db/schema";
+import { batches } from "../schema.js";
 import { inArray } from "drizzle-orm";
 
 export const saveBatches = async (batches: object[]) => {

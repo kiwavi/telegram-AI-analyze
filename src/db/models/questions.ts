@@ -1,5 +1,5 @@
-import { db } from "../../index";
-import { questions } from "../schema";
+import { db } from "../../../index.js";
+import { questions } from "../schema.js";
 import { eq } from "drizzle-orm";
 
 export const fetchAllQuestions = async (): Promise<
