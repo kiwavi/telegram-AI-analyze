@@ -2,7 +2,7 @@ import express, { Express, Request, Response, NextFunction } from "express";
 import dotenv from "dotenv";
 import { channels } from "./src/db/schema.js";
 import { messages } from "./src/db/schema.js";
-import { sql, eq } from "drizzle-orm";
+import { sql, eq, desc } from "drizzle-orm";
 
 dotenv.config();
 const app: Express = express();
@@ -46,7 +46,8 @@ app.get(
         })
         .from(messages)
         .innerJoin(channels, eq(messages.channel_id, channels.id))
-        .where(sql`message @@@ ${tags}`);
+        .where(sql`message @@@ ${tags}`)
+        .orderBy(desc(messages.telegram_created_at));
 
       return res.status(200).json({ success: true, data: results });
     } catch (e) {
