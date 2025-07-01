@@ -1,0 +1,247 @@
+We can now fetch all messages from Telegram.
+We can also now ping openAI
+We now need to create a table that saves the data and the questions to AI and the responses from AI.
+Based on this we can be able to tell which month had the highest acts of aggresion, which month had the lowest etc.
+We can also ask several questions based on the dataset.
+So it is probably wise to log all data into a db then hit AI later via loops.
+Each query to the API saves the question and answer to a JSON field.
+
+
+If we want to know the month with the most yes's, we can query all yes answers to our question and then analyze that.
+
+We should also add a table containing the questions we are going to ask the AI; these questions are saved only after we are done querying the AI and saving results.
+
+[{'Does this sentence exist within the context of the Israeli-Palestinian conflict?':'Yes'}]
+
+TABLE messages -> channel name, news_item, news_id, news_timestamp, created_at (timestamp with timezone), deleted_at (timestamp with timezone), ai_analysis (JSON)
+
+TABLE ai_questions -> question, created_at, deleted_at
+
+So someone can be able to choose a question and a certain result and then an analysis is done on the messages table.
+
+OR::
+
+Have 3 tables. Messages, questions, question-answers.
+
+Question-answers table should have relations to both messages table and questions table and then a column showing the answer.
+
+Then I would want to know whether the messages exist in the context of the Israel-Palestine war for a specific channel. Here i would check the question-answers table for the question and the answer is xx and the channel is xx based on the channel name.
+
+So we should probably have a channels table.
+
+channels, messages, questions, question-answers.
+
+channels (id, telegram_channel_id (unique), channel name, created_at, updated_at)
+messages (id, message, telegram_message_id, channel_id, created_at, updated_at)
+questions (id, question, created_at, deleted_at)
+question-answers (id, question_id, answer, message_id)
+
+
+We now need a way to channel all these messages into a db. They could be 78000 of them or not.
+
+What we want to do is import data from certain channels into our db. For now let's focus on existing data.
+
+Display all existing channels to someone. Then ask them to choose the one they want to import data into the db.
+
+first check from db whether the channels that the user has have all been saved to the db. If some are not, then ask the user whether to save the channels. If they say yes record them, if they say no exit the application.
+
+If some are there and some are recently joined, tell them of the new channels that are not saved in db and whether they want to add them to db
+
+Get the graph for rt speaking about Palestine.
+Get a graph for Aljazeera talking about Palestine
+
+The question is chosen from questions table (e.g Does this message exist in the context of the Israel-Palestine conflict? Answer with yes or no.)
+
+Does this message represent an act of aggression by Israel forces against Palestine? answer with yes or no.
+
+Does this message represent an act of aggression by a Palestine group against Israel?
+
+The answer is yes.
+
+The channel is RT news.
+
+So go to the answers table and find this question that has the answer as yes and the message is one by rt.
+Then we get the all the messages that have that answer and arrange them by date.
+
+Next is integrate cli select so that we can answer several questions:
+
+1. Which channel do you want to download info from.
+2. Do you want to save these new channels?
+
+Next thing now is to get the fetched channel and grab info from there. That needs its own function
+
+We can insert a question and ask a certain channel about it. So we first start by inserting a question like 'Is the message 'x' within the context of the Russia-Ukraine conflict?'
+
+Get the question, save it, then return it (we get the id). Then fetch the available channels. Ask the person which channel they want to ask this question. They choose RT (we get the channel id). So we browse through each message in messages where channel_id is rt and ask AI the particular question. We then save the message id, answer, question_id into the answers table.
+
+So first thing is to fetch the question and to save it.
+
+
+Batches.
+
+a table creating batch file ids.
+With the following fields:
+
+channel_id.
+question_id
+file_id - from openai
+status
+batch_id
+
+Batch file to have message id as the request id
+For each new line:
+   - request_id is message id.
+   - message content is 'question_id.question: message.message'
+Then upload the file and open AI gives us a file id.
+Create the batch (will return some metadata)
+Later we can download based on the file id
+
+So we should have a table where we save question_id, channel_id, file_id.
+
+Only record the table when we receive output from creating a batch. In this case we will save the question_id, channel_id, file_id, status, createdAt.
+
+Create a cron job to periodically check for the status of a batch.
+
+Each time we start up the program report the current batches that are ongoing, ones that are completed etc.1234
+
+Gameplan. Send a
+
+One question can be linked to many batches.
+One channel can be linked to many batches.
+
+batch_id should be unique
+
+
+fetch completed batches, get the data file from openai, write it to fs, then read from the file;
+
+for each line in the jsonl file, fetch the message id from the line, question id (from batch entry), fetch the answer (from the json line), add it to an object and append that object to an array.
+
+Now we have an array of objects containing answers, question_id,message_id.
+
+insert them all into the answers table using create many option for drizzle on conflict do nothing.
+
+
+cron job to run fetchAndUpdateValidatingBatches and update batches that are either (validating, in-progress)
+after running that it should run await retrieveBatchResults() in order to insert any answers belonging to complete batches
+
+
+Next thing is to use full text search using pg_search where we search using keywords, then plot that on a map. But first we need to be able to  see the results given by pg_search, hence we need to install.
+
+
+New plan now:
+
+Stop using openAI models because it is too expensive.
+Use pg_search instead installed as a binary.
+
+Display stuff on a graph.
+
+I need to use pg_search to do searches.
+
+The searches need to be on a fronted somewhere.
+
+git clone https://github.com/paradedb/paradedb.git
+cd paradedb
+sudo pacman -S rust
+cargo install cargo-pgrx
+echo 'export PATH="$HOME/.cargo/bin:$PATH"' >> ~/.bashrc
+cargo pgrx init
+make
+sudo PGRX_HOME="$PGRX_HOME" make install
+cargo pgrx package --profile=release --package=pg_search (while inside paradedb)
+
+
+
+#search .inputbox {
+    color: #888888;
+    font: 14px Arial,Helvetica,sans-serif;
+    height: 18px;
+    display: none;
+    padding: 10px;
+    -webkit-box-shadow: inset 0px 0px 2px 0px rgba(0,0,0,0.30);
+    -moz-box-shadow: inset 0px 0px 2px 0px rgba(0,0,0,0.30);
+    box-shadow: inset 0px 0px 2px 0px rgba(0,0,0,0.30);
+}
+div.mod_search63 input[type="search"] {
+    width: auto;
+    height: 40px;
+}
+.content_vote .btn, .btn.dropdown-toggle, .pager.pagenav a, .pager a, .btn-primary, span.content_vote input.btn, .btn, .input-append .add-on, .input-prepend .add-on, .btn.active, .btn:active, .btn:hover, .pagination ul, .readmore a.btn {
+    background-color: #7ba428;
+    border-color: #7ba428;
+}
+.module h3, .module_menu h3 {
+ font-size: 18px;
+font-family: Lato !important;
+    font-weight: bold;
+    padding: 8px;
+    text-align: center;
+}
+
+h2, h2 a:link, h2 a:visited, .content_header, .articleHead {
+    font-weight: 100;
+    font-size: 18px;
+    color: #6a9127;
+    font-size: lato;
+    line-height: 34px;
+    margin: 0px 0 10px !important;
+    padding: 0px 0px 12px;
+}
+
+logo_container, h1.logo, h1.logo a {
+    height: 100px;
+}
+.logo_container {
+    width: 40px;
+    top: 0px;
+    left: 0px;
+}
+
+.pagination {
+    height: 36px;
+    margin: -80px 0;
+}
+#custom {
+    background-color: #8c0009;
+    padding: 5px 0;
+    color: #8c0009;
+    margin: 0 auto;
+    width: 840px;
+    color: #8c0009;
+    float: right;
+    z-index: 1000000000;
+}
+h6 {
+    font-size: 0.8em;
+    font-weight: bold;
+}
+#main a.btn, #main a:hover.btn, .pagenav, #main a.pagenav, #main a:hover.pagenav, #main ul.pager li.previous a, #main ul.pager li.next a, i, span.content_vote input.btn {
+    color: #999 !important;
+}
+
+input[type="file"], input[type="image"], input[type="submit"], input[type="reset"], input[type="button"], input[type="radio"], input[type="checkbox"] {
+    width: 150PX;
+}
+
+.rrssb-buttons.large-format, .rrssb-buttons.large-format li {
+    width: 50%;
+   font-size: 12.5px;
+}
+}
+
+.s2s_credits_wrapper .social2s_credits {
+    margin-top: -10px;
+    margin-bottom: 10px;
+    display: block;
+    font-size: 9px;
+    display: none;
+}
+
+Now we need to set up our API.
+API is now set up.
+
+
+What useful did I initially want?
+
+Calender based chart showing when each tag was mentioned and by which channel. We can be able to see periods when each tag was mentioned and which channel really mentioned it more.
+
+Create charts with recharts
