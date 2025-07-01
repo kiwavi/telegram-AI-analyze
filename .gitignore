@@ -47,3 +47,37 @@ test/*.js
 
 #drizzle files
 /backend/drizzle/*
+
+
+# Node modules (backend & frontend)
+**/node_modules/
+
+# Build outputs
+frontend/build/
+backend/dist/
+backend/build/
+
+# Logs
+**/*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files
+**/.env
+.env*
+
+# VSCode and other editor settings
+.vscode/
+.idea/
+
+# Optional: Ignore local data
+backend/docs/*
+
+# Optional: Ignore coverage if using testing
+coverage/
+
+# Optional: Ignore TS build files
+**/*.tsbuildinfo
