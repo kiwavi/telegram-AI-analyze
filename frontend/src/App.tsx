@@ -1,11 +1,11 @@
 import React from "react";
-import logo from "./logo.svg";
 import "./App.css";
 import FetchTags from "./tags";
 
 function App() {
   return (
     <div className="App">
+      <h1 className="text-3xl"> Telegram search </h1>
       <FetchTags />
     </div>
   );
