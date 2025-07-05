@@ -6,6 +6,7 @@ function App() {
   return (
     <div className="App">
       <h1 className="text-3xl"> Telegram search </h1>
+      {/* get tags */}
       <FetchTags />
     </div>
   );
