@@ -16,6 +16,7 @@
     "@inquirer/prompts": "^7.2.4",
     "@types/prompt-sync": "^4.2.3",
     "cli-select": "^1.1.2",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.38.4",
     "express": "^4.21.2",
