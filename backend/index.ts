@@ -4,11 +4,13 @@ import { channels } from "./src/db/schema.js";
 import { messages } from "./src/db/schema.js";
 import { sql, eq, desc } from "drizzle-orm";
 import morgan from "morgan";
+import cors from "cors";
 
 dotenv.config();
 const app: Express = express();
 const port = process.env.PORT;
 import { z } from "zod";
+app.use(cors());
 
 import { drizzle } from "drizzle-orm/node-postgres";
 

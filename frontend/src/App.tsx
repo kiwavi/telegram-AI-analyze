@@ -15,9 +15,10 @@ function App() {
     e.preventDefault();
     let tagsJoined = tags.join("&tags=");
     try {
-      let data = axios.get(`http://localhost:3099?tags=${tagsJoined}`);
-      console.log(`http://localhost:3099?tags=${tagsJoined}`);
-      console.log(data);
+      let data = await axios.get(
+        `http://localhost:3099/messages?tags=${tagsJoined}`
+      );
+      setData(data.data);
     } catch (e) {
       console.log(e);
     }
