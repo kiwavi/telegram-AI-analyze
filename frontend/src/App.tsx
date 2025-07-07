@@ -1,6 +1,6 @@
 import React from "react";
-import "./App.css";
 import FetchTags from "./tags";
+import "./tailwind.css";
 
 function App() {
   return (
