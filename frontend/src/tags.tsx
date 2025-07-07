@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 
-export default function FetchTags() {
+type TagInputProps = {
+  onChange: (tags: string[]) => void;
+};
+
+export default function FetchTags({ onChange }: TagInputProps) {
   const [input, setInput] = useState("");
   const [tags, setTags] = useState<string[]>([]);
 
@@ -8,12 +12,14 @@ export default function FetchTags() {
     const trimmed = input.trim();
     if (trimmed && !tags.includes(trimmed)) {
       setTags([...tags, trimmed]);
+      onChange([...tags, trimmed]);
     }
     setInput("");
   };
 
   const removeTag = (index: number) => {
     setTags(tags.filter((_, i) => i !== index));
+    onChange(tags.filter((_, i) => i !== index));
   };
 
   return (
