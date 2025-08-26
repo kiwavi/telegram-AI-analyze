@@ -70,6 +70,8 @@ function App() {
           Search Tags{" "}
         </button>
       </div>
+      {/*render chart as long as sorted is true*/}
+      
     </div>
   );
 }
