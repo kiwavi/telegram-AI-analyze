@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import FetchTags from "./tags";
 import "./tailwind.css";
-import axios, { isCancel, AxiosError } from "axios";
+import axios from "axios";
 
 function App() {
   const [tags, setTags] = useState<string[]>([]);
