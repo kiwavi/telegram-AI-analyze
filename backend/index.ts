@@ -57,11 +57,11 @@ app.get(
     } catch (e) {
       return res.status(500).json({ success: false });
     }
-  }
+  },
 );
 
 app.listen(port, () => {
   console.log(
-    `[server]: Server is running at http://localhost:${port || 3000}`
+    `[server]: Server is running at http://localhost:${port || 3000}`,
   );
 });
