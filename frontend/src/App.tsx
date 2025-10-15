@@ -99,17 +99,14 @@ function App() {
                             tickFormatter={(d) => d.split("T")[0]}
                         />
                         <YAxis />
-                        <Tooltip
-                            labelFormatter={(label) => label.split("T")[0]}
-                            formatter={(v) => [`${v} mentions`, "Mentions"]}
-                        />
+                        <Tooltip />
                         <Legend />
                         {all_channels.map((chan, i) => (
                             <Line
-                                key={chan}
+                                // key={chan}
                                 type="monotone"
                                 dataKey={chan}
-                                strokeWidth={2}
+                                strokeWidth={4}
                                 stroke={
                                     [
                                         "#8884d8",
