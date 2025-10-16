@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import FetchTags from "./tags";
 import "./tailwind.css";
 import axios from "axios";
@@ -19,11 +19,29 @@ function App() {
     const [sorted, setSorted] = useState<object[]>([]);
     const [all_channels, setAllChannels] = useState<string[]>([]);
 
+    async function getData() {
+        let tagsJoined = tags.join("&tags=");
+        try {
+            let data = await axios.get(
+                `http://localhost:3099/messages?tags=${tagsJoined}`,
+            );
+            sortData(data.data);
+            setData(data.data);
+        } catch (e) {
+            console.log(e);
+        }
+    }
+
+    useEffect(() => {
+        if (tags.length > 0) {
+            getData();
+        } else {
+            setSorted([]);
+        }
+    }, [tags]);
+
     const handleTagsChange = async (updatedTags: string[]) => {
         setTags(updatedTags);
-        if (tags?.length) {
-            await getData();
-        }
     };
 
     const sortData = (data: {
@@ -65,19 +83,6 @@ function App() {
     async function fetchData(e: React.FormEvent<HTMLButtonElement>) {
         e.preventDefault();
         await getData();
-    }
-
-    async function getData() {
-        let tagsJoined = tags.join("&tags=");
-        try {
-            let data = await axios.get(
-                `http://localhost:3099/messages?tags=${tagsJoined}`,
-            );
-            sortData(data.data);
-            setData(data.data);
-        } catch (e) {
-            console.log(e);
-        }
     }
 
     return (
