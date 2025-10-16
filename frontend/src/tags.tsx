@@ -5,7 +5,7 @@ type TagInputProps = {
 };
 
 export default function FetchTags({ onChange }: TagInputProps) {
-    const [input, setInput] = useState("");
+    const [input, setInput] = useState<string>("");
     const [tags, setTags] = useState<string[]>([]);
 
     const addTag = () => {

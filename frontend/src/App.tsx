@@ -19,8 +19,11 @@ function App() {
     const [sorted, setSorted] = useState<object[]>([]);
     const [all_channels, setAllChannels] = useState<string[]>([]);
 
-    const handleTagsChange = (updatedTags: string[]) => {
+    const handleTagsChange = async (updatedTags: string[]) => {
         setTags(updatedTags);
+        if (tags?.length) {
+            await getData();
+        }
     };
 
     const sortData = (data: {
@@ -54,13 +57,17 @@ function App() {
             sortedData.push(obj);
         }
 
-        console.log(sortedData);
+        // console.log(sortedData);
 
         setSorted(sortedData);
     };
 
     async function fetchData(e: React.FormEvent<HTMLButtonElement>) {
         e.preventDefault();
+        await getData();
+    }
+
+    async function getData() {
         let tagsJoined = tags.join("&tags=");
         try {
             let data = await axios.get(
