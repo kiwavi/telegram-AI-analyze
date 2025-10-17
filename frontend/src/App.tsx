@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import FetchTags from "./tags";
 import "./tailwind.css";
 import axios from "axios";
@@ -18,6 +18,7 @@ function App() {
     const [data, setData] = useState<object[]>([]);
     const [sorted, setSorted] = useState<object[]>([]);
     const [all_channels, setAllChannels] = useState<string[]>([]);
+    const [isPending, startTransition] = useTransition();
 
     async function getData() {
         let tagsJoined = tags.join("&tags=");
@@ -25,8 +26,10 @@ function App() {
             let data = await axios.get(
                 `http://localhost:3099/messages?tags=${tagsJoined}`,
             );
-            sortData(data.data);
-            setData(data.data);
+            startTransition(() => {
+                setData(data.data);
+                sortData(data.data);
+            });
         } catch (e) {
             console.log(e);
         }
@@ -53,32 +56,61 @@ function App() {
             created_at: string;
         }[];
     }) => {
-        // receives the data and sorts it in a format that can be charted. Send to db as json
-        let channels = Array.from(
-            new Set(data.data.map((dt) => dt.channelName)),
-        );
-        setAllChannels(channels);
-        let dates = Array.from(new Set(data.data.map((dt) => dt.created_at)));
-        let sortedData = [];
+        const messages = data.data;
+        const grouped = new Map();
 
-        // for each date, go through the dataset. For each channel, find the number of mentions per day
-        for (let date of dates) {
-            let obj = { date } as Record<string, number> & { date: string };
-            obj.date = date;
-            for (let chan of channels) {
-                let mentions = data.data.filter(
-                    (x) => x.created_at === date && x.channelName === chan,
-                ).length;
-
-                obj[chan] = mentions;
-            }
-            sortedData.push(obj);
+        for (const msg of messages) {
+            const { created_at, channelName } = msg;
+            if (!grouped.has(created_at))
+                grouped.set(created_at, { date: created_at });
+            const entry = grouped.get(created_at);
+            entry[channelName] = (entry[channelName] || 0) + 1;
         }
 
-        // console.log(sortedData);
+        const sortedData = Array.from(grouped.values());
+        const channels = Array.from(
+            new Set(messages.map((m) => m.channelName)),
+        );
 
+        setAllChannels(channels);
         setSorted(sortedData);
     };
+
+    // const sortData = (data: {
+    //     success: boolean;
+    //     data: {
+    //         messageId: number;
+    //         messageText: string;
+    //         channelName: string;
+    //         created_at: string;
+    //     }[];
+    // }) => {
+    //     // receives the data and sorts it in a format that can be charted. Send to db as json
+    //     let channels = Array.from(
+    //         new Set(data.data.map((dt) => dt.channelName)),
+    //     );
+    //     setAllChannels(channels);
+    //     let dates = Array.from(new Set(data.data.map((dt) => dt.created_at)));
+    //     let sortedData = [];
+
+    //     // for each date, go through the dataset. For each channel, find the number of mentions per day
+    //     for (let date of dates) {
+    //         let obj = { date } as Record<string, number> & { date: string };
+    //         obj.date = date;
+    //         for (let chan of channels) {
+    //             let mentions = data.data.filter(
+    //                 (x) => x.created_at === date && x.channelName === chan,
+    //             ).length;
+
+    //             obj[chan] = mentions;
+    //         }
+    //         sortedData.push(obj);
+    //     }
+
+    //     // console.log(sortedData);
+
+    //     setSorted(sortedData);
+    // };
 
     async function fetchData(e: React.FormEvent<HTMLButtonElement>) {
         e.preventDefault();
