@@ -12,5 +12,7 @@ app.get("/", function (req, res) {
     res.send("");
 });
 app.listen(port, function () {
-    console.log("[server]: Server is running at http://localhost:".concat(port));
+    console.log(
+        "[server]: Server is running at http://localhost:".concat(port),
+    );
 });
