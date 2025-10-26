@@ -67,11 +67,22 @@ function App() {
       entry[channelName] = (entry[channelName] || 0) + 1;
     }
 
-    const sortedData = Array.from(grouped.values());
+    const allDates = Array.from(grouped.keys()).sort(
+      (a, b) => new Date(a).getTime() - new Date(b).getTime(),
+    );
+
     const channels = Array.from(new Set(messages.map((m) => m.channelName)));
 
+    const filled = allDates.map((date) => {
+      const row = grouped.get(date)!;
+      for (const chan of channels) {
+        if (!(chan in row)) row[chan] = 0;
+      }
+      return row;
+    });
+
     setAllChannels(channels);
-    setSorted(sortedData);
+    setSorted(filled);
   };
 
   async function fetchData(e: React.FormEvent<HTMLButtonElement>) {
@@ -106,10 +117,10 @@ function App() {
             <Legend />
             {all_channels.map((chan, i) => (
               <Line
-                // key={chan}
+                key={chan}
                 type="monotone"
                 dataKey={chan}
-                strokeWidth={4}
+                strokeWidth={3}
                 stroke={
                   ["#8884d8", "#82ca9d", "#ff7300", "#00C49F", "#FFBB28"][i % 5]
                 }
